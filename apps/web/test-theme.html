@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theme Test</title>
+  <style>
+    :root {
+      --color-bg-primary: 255 255 255;
+      --color-text-primary: 17 24 39;
+    }
+
+    .dark {
+      --color-bg-primary: 13 17 23;
+      --color-text-primary: 230 237 243;
+    }
+
+    body {
+      background-color: rgb(var(--color-bg-primary));
+      color: rgb(var(--color-text-primary));
+      font-family: system-ui, sans-serif;
+      padding: 40px;
+      transition: all 0.2s ease;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #58A6FF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+
+    .info {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px solid rgb(var(--color-text-primary));
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Theme Toggle Test</h1>
+  <p>This tests if CSS variables and dark mode switching work.</p>
+
+  <div class="info">
+    <p><strong>Current Theme:</strong> <span id="theme-status">Dark</span></p>
+    <p><strong>HTML Class:</strong> <span id="html-class">dark</span></p>
+    <p><strong>BG Color:</strong> <span id="bg-color">-</span></p>
+  </div>
+
+  <button onclick="toggleTheme()">Toggle Theme</button>
+  <button onclick="testStore()">Test Zustand Store</button>
+
+  <div id="output" style="margin-top: 20px; white-space: pre-wrap; font-family: monospace;"></div>
+
+  <script>
+    function updateStatus() {
+      const isDark = document.documentElement.classList.contains('dark');
+      document.getElementById('theme-status').textContent = isDark ? 'Dark' : 'Light';
+      document.getElementById('html-class').textContent = document.documentElement.className || 'none';
+
+      const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--color-bg-primary');
+      document.getElementById('bg-color').textContent = bgColor;
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+      } else {
+        html.classList.add('dark');
+      }
+      updateStatus();
+    }
+
+    function testStore() {
+      const output = document.getElementById('output');
+      try {
+        // Check localStorage
+        const stored = localStorage.getItem('alpha-signal-theme');
+        output.textContent = 'LocalStorage Check:\n';
+        output.textContent += stored ? JSON.stringify(JSON.parse(stored), null, 2) : 'No theme stored';
+        output.textContent += '\n\nHTML Classes: ' + document.documentElement.className;
+        output.textContent += '\n\nCSS Variable (--color-bg-primary): ' +
+          getComputedStyle(document.documentElement).getPropertyValue('--color-bg-primary');
+      } catch (e) {
+        output.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    // Initialize
+    updateStatus();
+
+    // Watch for changes
+    const observer = new MutationObserver(updateStatus);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1121 @@
+// Prisma Schema for Alpha Signal - AI-Powered Stock Intelligence Platform
+// PostgreSQL with TimescaleDB for time-series data
+
+generator client {
+  provider        = "prisma-client-js"
+  // Enable query engine features for better performance
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum MarketCapCategory {
+  LARGE_CAP
+  MID_CAP
+  SMALL_CAP
+  MICRO_CAP
+}
+
+enum PeriodType {
+  QUARTERLY
+  ANNUAL
+  TTM
+}
+
+enum TransactionType {
+  BUY
+  SELL
+}
+
+enum SentimentLabel {
+  POSITIVE
+  NEGATIVE
+  NEUTRAL
+}
+
+enum ImpactRating {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum SummaryType {
+  BUSINESS_OVERVIEW
+  EARNINGS_SUMMARY
+  BULL_CASE
+  BEAR_CASE
+  NEWS_DIGEST
+  RISK_ASSESSMENT
+  CURRENT_THESIS
+}
+
+enum ConfidenceLevel {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum RiskFlagType {
+  PROMOTER_PLEDGE
+  AUDITOR_CONCERN
+  RELATED_PARTY
+  DEBT_SPIRAL
+  EARNINGS_MANIPULATION
+  GOVERNANCE
+  LITIGATION
+  REGULATORY
+}
+
+enum Severity {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum UserTier {
+  FREE
+  PRO
+  PREMIUM
+}
+
+enum AlertConditionType {
+  PRICE_ABOVE
+  PRICE_BELOW
+  VOLUME_SPIKE
+  SENTIMENT_CHANGE
+  RISK_FLAG
+  SCORE_CHANGE
+}
+
+enum PriceInterval {
+  MIN_1
+  MIN_5
+  MIN_15
+  HOUR_1
+  DAILY
+}
+
+enum LLMTaskType {
+  SUMMARY
+  SENTIMENT
+  REPORT
+  OTHER
+}
+
+enum ReportType {
+  SECTOR_WEEKLY
+  MACRO_WEEKLY
+}
+
+enum SectionType {
+  TEXT
+  CHART_DATA
+  TABLE_DATA
+  METRIC_CARDS
+  STOCK_LIST
+}
+
+enum NewsletterFrequency {
+  WEEKLY
+  DAILY
+}
+
+enum EventType {
+  QUARTERLY_RESULT
+  ANNUAL_RESULT
+  MANAGEMENT_CHANGE
+  DIVIDEND
+  STOCK_SPLIT
+  BONUS
+  RIGHTS_ISSUE
+  ACQUISITION
+  DIVESTITURE
+  CAPEX_ANNOUNCEMENT
+  ORDER_WIN
+  ORDER_LOSS
+  PRODUCT_LAUNCH
+  PLANT_EXPANSION
+  REGULATORY_ACTION
+  SEBI_NOTICE
+  CREDIT_RATING_CHANGE
+  AUDITOR_CHANGE
+  PROMOTER_CHANGE
+  BULK_DEAL
+  BLOCK_DEAL
+  PLEDGE_CHANGE
+  SECTOR_POLICY
+  GOVERNMENT_ORDER
+  CONCALL_HIGHLIGHT
+  ANALYST_ACTION
+  MEDIA_COVERAGE
+  LITIGATION_UPDATE
+  AGM_EGM
+  BOARD_MEETING
+  OTHER
+}
+
+enum ImpactAssessment {
+  VERY_POSITIVE
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+  VERY_NEGATIVE
+}
+
+enum MilestoneType {
+  MAJOR_ACHIEVEMENT
+  SIGNIFICANT_SETBACK
+  STRATEGIC_SHIFT
+  MARKET_MILESTONE
+  OPERATIONAL_MILESTONE
+}
+
+enum TimelinePeriodType {
+  LAST_7_DAYS
+  LAST_30_DAYS
+  LAST_90_DAYS
+  LAST_6_MONTHS
+  LAST_1_YEAR
+  LAST_3_YEARS
+  LAST_5_YEARS
+  ALL_TIME
+}
+
+enum CompanyProfileSectionType {
+  BUSINESS_MODEL
+  PRODUCTS_SERVICES
+  COMPETITIVE_POSITION
+  MANAGEMENT_TEAM
+  FINANCIAL_HIGHLIGHTS
+  GROWTH_DRIVERS
+  KEY_RISKS
+}
+
+// ============================================
+// CORE MASTER DATA MODELS
+// ============================================
+
+model Sector {
+  id             String   @id @default(uuid()) @db.Uuid
+  name           String
+  slug           String   @unique
+  parentSectorId String?  @db.Uuid
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Self-referencing for sub-sectors
+  parentSector Sector?  @relation("SectorHierarchy", fields: [parentSectorId], references: [id], onDelete: SetNull)
+  subSectors   Sector[] @relation("SectorHierarchy")
+
+  // Relationships
+  industries    Industry[]
+  companies     Company[]
+  newsArticles  NewsArticle[]
+  weeklyReports WeeklyReport[]
+
+  @@map("sectors")
+}
+
+model Industry {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  sectorId  String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  sector    Sector    @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  companies Company[]
+
+  @@index([sectorId])
+  @@map("industries")
+}
+
+model Company {
+  id                String            @id @default(uuid()) @db.Uuid
+  nseSymbol         String?           @unique @map("nse_symbol")
+  bseCode           String?           @unique @map("bse_code")
+  isin              String            @unique @db.Char(12)
+  companyName       String            @map("company_name")
+  shortName         String            @map("short_name")
+  sectorId          String            @map("sector_id") @db.Uuid
+  industryId        String            @map("industry_id") @db.Uuid
+  marketCapCategory MarketCapCategory @map("market_cap_category")
+  listingDate       DateTime?         @map("listing_date") @db.Date
+  isActive          Boolean           @default(true) @map("is_active")
+  metadata          Json?
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  // Relationships
+  sector               Sector                @relation(fields: [sectorId], references: [id], onDelete: Restrict)
+  industry             Industry              @relation(fields: [industryId], references: [id], onDelete: Restrict)
+  financialResults     FinancialResult[]
+  balanceSheetData     BalanceSheetData[]
+  cashflowData         CashflowData[]
+  shareholdingPatterns ShareholdingPattern[]
+  insiderTransactions  InsiderTransaction[]
+  technicalIndicators  TechnicalIndicator[]
+  newsArticles         NewsArticle[]
+  sentimentSnapshots   SentimentSnapshot[]
+  aiSummaries          AiSummary[]
+  compositeScores      CompositeScore[]
+  riskFlags            RiskFlag[]
+  alerts               Alert[]
+  userPortfolios       UserPortfolio[]
+  stockEvents          StockEvent[]
+  stockMilestones      StockMilestone[]
+  companyTimelineSummaries CompanyTimelineSummary[]
+  companyProfiles      CompanyProfile[]
+
+  @@index([nseSymbol])
+  @@index([bseCode])
+  @@index([sectorId])
+  @@index([industryId])
+  @@index([isActive])
+  @@map("companies")
+}
+
+// ============================================
+// FINANCIAL DATA MODELS
+// ============================================
+
+model FinancialResult {
+  id              String     @id @default(uuid()) @db.Uuid
+  companyId       String     @map("company_id") @db.Uuid
+  periodType      PeriodType @map("period_type")
+  fiscalYear      Int        @map("fiscal_year")
+  fiscalQuarter   Int?       @map("fiscal_quarter")
+  revenue         Decimal?   @db.Decimal(20, 2)
+  operatingProfit Decimal?   @map("operating_profit") @db.Decimal(20, 2)
+  netProfit       Decimal?   @map("net_profit") @db.Decimal(20, 2)
+  eps             Decimal?   @db.Decimal(10, 2)
+  operatingMargin Decimal?   @map("operating_margin") @db.Decimal(5, 2)
+  netMargin       Decimal?   @map("net_margin") @db.Decimal(5, 2)
+  taxRate         Decimal?   @map("tax_rate") @db.Decimal(5, 2)
+  rawData         Json?      @map("raw_data")
+  sourceUrl       String?    @map("source_url")
+  publishedAt     DateTime   @map("published_at")
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, fiscalYear, fiscalQuarter, periodType])
+  @@index([companyId, publishedAt])
+  @@map("financial_results")
+}
+
+model BalanceSheetData {
+  id               String   @id @default(uuid()) @db.Uuid
+  companyId        String   @map("company_id") @db.Uuid
+  fiscalYear       Int      @map("fiscal_year")
+  fiscalQuarter    Int?     @map("fiscal_quarter")
+  totalAssets      Decimal? @map("total_assets") @db.Decimal(20, 2)
+  totalDebt        Decimal? @map("total_debt") @db.Decimal(20, 2)
+  equity           Decimal? @db.Decimal(20, 2)
+  cashEquivalents  Decimal? @map("cash_equivalents") @db.Decimal(20, 2)
+  currentRatio     Decimal? @map("current_ratio") @db.Decimal(5, 2)
+  debtToEquity     Decimal? @map("debt_to_equity") @db.Decimal(5, 2)
+  interestCoverage Decimal? @map("interest_coverage") @db.Decimal(5, 2)
+  rawData          Json?    @map("raw_data")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, fiscalYear, fiscalQuarter])
+  @@index([companyId, fiscalYear])
+  @@map("balance_sheet_data")
+}
+
+model CashflowData {
+  id            String   @id @default(uuid()) @db.Uuid
+  companyId     String   @map("company_id") @db.Uuid
+  fiscalYear    Int      @map("fiscal_year")
+  fiscalQuarter Int?     @map("fiscal_quarter")
+  operatingCf   Decimal? @map("operating_cf") @db.Decimal(20, 2)
+  investingCf   Decimal? @map("investing_cf") @db.Decimal(20, 2)
+  financingCf   Decimal? @map("financing_cf") @db.Decimal(20, 2)
+  freeCashFlow  Decimal? @map("free_cash_flow") @db.Decimal(20, 2)
+  capex         Decimal? @db.Decimal(20, 2)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, fiscalYear, fiscalQuarter])
+  @@index([companyId, fiscalYear])
+  @@map("cashflow_data")
+}
+
+model ShareholdingPattern {
+  id                 String   @id @default(uuid()) @db.Uuid
+  companyId          String   @map("company_id") @db.Uuid
+  quarter            DateTime @db.Date
+  promoterHoldingPct Decimal  @map("promoter_holding_pct") @db.Decimal(5, 2)
+  fiiHoldingPct      Decimal  @map("fii_holding_pct") @db.Decimal(5, 2)
+  diiHoldingPct      Decimal  @map("dii_holding_pct") @db.Decimal(5, 2)
+  publicHoldingPct   Decimal  @map("public_holding_pct") @db.Decimal(5, 2)
+  pledgePct          Decimal? @map("pledge_pct") @db.Decimal(5, 2)
+  numShareholders    Int?     @map("num_shareholders")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, quarter])
+  @@index([companyId, quarter])
+  @@map("shareholding_patterns")
+}
+
+model InsiderTransaction {
+  id              String          @id @default(uuid()) @db.Uuid
+  companyId       String          @map("company_id") @db.Uuid
+  transactionType TransactionType @map("transaction_type")
+  quantity        BigInt
+  price           Decimal         @db.Decimal(10, 2)
+  value           Decimal         @db.Decimal(20, 2)
+  personName      String          @map("person_name")
+  personCategory  String          @map("person_category")
+  filingDate      DateTime        @map("filing_date") @db.Date
+  createdAt       DateTime        @default(now()) @map("created_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, filingDate])
+  @@map("insider_transactions")
+}
+
+// ============================================
+// TECHNICAL ANALYSIS MODELS
+// ============================================
+
+model TechnicalIndicator {
+  id            String   @id @default(uuid()) @db.Uuid
+  companyId     String   @map("company_id") @db.Uuid
+  date          DateTime @db.Date
+  rsi14         Decimal? @map("rsi_14") @db.Decimal(5, 2)
+  macd          Decimal? @db.Decimal(10, 4)
+  macdSignal    Decimal? @map("macd_signal") @db.Decimal(10, 4)
+  macdHistogram Decimal? @map("macd_histogram") @db.Decimal(10, 4)
+  sma20         Decimal? @map("sma_20") @db.Decimal(10, 2)
+  sma50         Decimal? @map("sma_50") @db.Decimal(10, 2)
+  sma100        Decimal? @map("sma_100") @db.Decimal(10, 2)
+  sma200        Decimal? @map("sma_200") @db.Decimal(10, 2)
+  ema20         Decimal? @map("ema_20") @db.Decimal(10, 2)
+  adx           Decimal? @db.Decimal(5, 2)
+  obv           BigInt?
+  bbUpper       Decimal? @map("bb_upper") @db.Decimal(10, 2)
+  bbMiddle      Decimal? @map("bb_middle") @db.Decimal(10, 2)
+  bbLower       Decimal? @map("bb_lower") @db.Decimal(10, 2)
+  atr           Decimal? @db.Decimal(10, 2)
+  stochasticK   Decimal? @map("stochastic_k") @db.Decimal(5, 2)
+  stochasticD   Decimal? @map("stochastic_d") @db.Decimal(5, 2)
+  volumeSma20   BigInt?  @map("volume_sma_20")
+  deliveryPct   Decimal? @map("delivery_pct") @db.Decimal(5, 2)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, date])
+  @@index([companyId, date])
+  @@map("technical_indicators")
+}
+
+// ============================================
+// NEWS & SENTIMENT MODELS
+// ============================================
+
+model NewsArticle {
+  id             String          @id @default(uuid()) @db.Uuid
+  companyId      String?         @map("company_id") @db.Uuid
+  sectorId       String?         @map("sector_id") @db.Uuid
+  title          String
+  source         String
+  url            String          @unique
+  publishedAt    DateTime        @map("published_at")
+  summary        String?         @db.Text
+  fullText       String?         @map("full_text") @db.Text
+  sentimentScore Decimal?        @map("sentiment_score") @db.Decimal(5, 4)
+  sentimentLabel SentimentLabel? @map("sentiment_label")
+  impactRating   ImpactRating?   @map("impact_rating")
+  riskTags       String[]        @map("risk_tags")
+  createdAt      DateTime        @default(now()) @map("created_at")
+
+  // Relationships
+  company Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sector  Sector?  @relation(fields: [sectorId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, publishedAt])
+  @@index([sectorId, publishedAt])
+  @@index([publishedAt])
+  @@map("news_articles")
+}
+
+model SentimentSnapshot {
+  id                 String   @id @default(uuid()) @db.Uuid
+  companyId          String   @map("company_id") @db.Uuid
+  date               DateTime @db.Date
+  newsSentiment      Decimal? @map("news_sentiment") @db.Decimal(5, 4)
+  socialSentiment    Decimal? @map("social_sentiment") @db.Decimal(5, 4)
+  compositeSentiment Decimal? @map("composite_sentiment") @db.Decimal(5, 4)
+  sampleSize         Int      @map("sample_size")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, date])
+  @@index([companyId, date])
+  @@map("sentiment_snapshots")
+}
+
+// ============================================
+// AI & SCORING MODELS
+// ============================================
+
+model AiSummary {
+  id                String          @id @default(uuid()) @db.Uuid
+  companyId         String          @map("company_id") @db.Uuid
+  summaryType       SummaryType     @map("summary_type")
+  content           Json
+  modelVersion      String          @map("model_version")
+  promptVersion     String          @map("prompt_version")
+  confidence        ConfidenceLevel
+  dataFreshnessNote String?         @map("data_freshness_note")
+  generatedAt       DateTime        @default(now()) @map("generated_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, summaryType])
+  @@index([generatedAt])
+  @@map("ai_summaries")
+}
+
+model CompositeScore {
+  id              String   @id @default(uuid()) @db.Uuid
+  companyId       String   @map("company_id") @db.Uuid
+  date            DateTime @db.Date
+  qualityScore    Int      @map("quality_score") // 0-100
+  growthScore     Int      @map("growth_score") // 0-100
+  riskScore       Int      @map("risk_score") // 0-100
+  sentimentScore  Int      @map("sentiment_score") // 0-100
+  momentumScore   Int      @map("momentum_score") // 0-100
+  factorBreakdown Json     @map("factor_breakdown")
+  computedAt      DateTime @default(now()) @map("computed_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, date])
+  @@index([companyId, date])
+  @@index([date])
+  @@map("composite_scores")
+}
+
+model RiskFlag {
+  id          String       @id @default(uuid()) @db.Uuid
+  companyId   String       @map("company_id") @db.Uuid
+  flagType    RiskFlagType @map("flag_type")
+  severity    Severity
+  description String       @db.Text
+  detectedAt  DateTime     @default(now()) @map("detected_at")
+  resolvedAt  DateTime?    @map("resolved_at")
+  evidence    Json?
+  isActive    Boolean      @default(true) @map("is_active")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, isActive])
+  @@index([severity])
+  @@index([detectedAt])
+  @@map("risk_flags")
+}
+
+// ============================================
+// USER & PORTFOLIO MODELS
+// ============================================
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  name         String?
+  tier         UserTier  @default(FREE)
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  lastLoginAt  DateTime? @map("last_login_at")
+
+  // Relationships
+  watchlists           Watchlist[]
+  alerts               Alert[]
+  userPortfolios       UserPortfolio[]
+  subscriptions        Subscription[]
+  payments             Payment[]
+  newsletterSubscriber NewsletterSubscriber?
+
+  @@map("users")
+}
+
+model Watchlist {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  name        String
+  companyIds  String[] @map("company_ids") @db.Uuid
+  alertConfig Json?    @map("alert_config")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("watchlists")
+}
+
+model Alert {
+  id              String             @id @default(uuid()) @db.Uuid
+  userId          String             @map("user_id") @db.Uuid
+  companyId       String             @map("company_id") @db.Uuid
+  conditionType   AlertConditionType @map("condition_type")
+  threshold       Decimal            @db.Decimal(10, 2)
+  isActive        Boolean            @default(true) @map("is_active")
+  lastTriggeredAt DateTime?          @map("last_triggered_at")
+  createdAt       DateTime           @default(now()) @map("created_at")
+
+  // Relationships
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
+  @@index([companyId])
+  @@map("alerts")
+}
+
+model UserPortfolio {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  companyId     String   @map("company_id") @db.Uuid
+  quantity      Int
+  avgPrice      Decimal  @map("avg_price") @db.Decimal(10, 2)
+  currentValue  Decimal? @map("current_value") @db.Decimal(20, 2)
+  unrealizedPnl Decimal? @map("unrealized_pnl") @db.Decimal(20, 2)
+  addedAt       DateTime @default(now()) @map("added_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, companyId])
+  @@index([userId])
+  @@map("user_portfolios")
+}
+
+// ============================================
+// BILLING & SUBSCRIPTION MODELS
+// ============================================
+
+enum BillingCycle {
+  MONTHLY
+  ANNUAL
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  HALTED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+model SubscriptionPlan {
+  id             String       @id @default(uuid()) @db.Uuid
+  name           String       @unique
+  razorpayPlanId String       @unique @map("razorpay_plan_id")
+  tier           UserTier
+  billingCycle   BillingCycle @map("billing_cycle")
+  regularPrice   Int          @map("regular_price") // in paise (1 rupee = 100 paise)
+  launchPrice    Int          @map("launch_price")
+  isLaunchActive Boolean      @default(true) @map("is_launch_active")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  // Relationships
+  subscriptions Subscription[]
+
+  @@map("subscription_plans")
+}
+
+model Coupon {
+  id              String   @id @default(uuid()) @db.Uuid
+  code            String   @unique
+  discountPct     Int      @map("discount_pct") // 0-100
+  maxUses         Int      @map("max_uses")
+  currentUses     Int      @default(0) @map("current_uses")
+  validFrom       DateTime @map("valid_from")
+  validUntil      DateTime @map("valid_until")
+  applicableTiers String[] @map("applicable_tiers") // ['PRO', 'PREMIUM']
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relationships
+  subscriptions Subscription[]
+
+  @@map("coupons")
+}
+
+model Subscription {
+  id                     String             @id @default(uuid()) @db.Uuid
+  userId                 String             @map("user_id") @db.Uuid
+  razorpaySubscriptionId String             @unique @map("razorpay_subscription_id")
+  planId                 String             @map("plan_id") @db.Uuid
+  status                 SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart     DateTime           @map("current_period_start")
+  currentPeriodEnd       DateTime           @map("current_period_end")
+  cancelAtPeriodEnd      Boolean            @default(false) @map("cancel_at_period_end")
+  couponId               String?            @map("coupon_id") @db.Uuid
+  createdAt              DateTime           @default(now()) @map("created_at")
+  updatedAt              DateTime           @updatedAt @map("updated_at")
+
+  // Relationships
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan     SubscriptionPlan @relation(fields: [planId], references: [id])
+  coupon   Coupon?          @relation(fields: [couponId], references: [id])
+  payments Payment[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model Payment {
+  id                String        @id @default(uuid()) @db.Uuid
+  userId            String        @map("user_id") @db.Uuid
+  subscriptionId    String        @map("subscription_id") @db.Uuid
+  razorpayPaymentId String        @unique @map("razorpay_payment_id")
+  amount            Int // in paise
+  currency          String        @default("INR")
+  status            PaymentStatus @default(SUCCESS)
+  paymentMethod     String?       @map("payment_method")
+  receiptUrl        String?       @map("receipt_url")
+  invoiceNumber     String?       @unique @map("invoice_number")
+  taxableAmount     Int?          @map("taxable_amount") // in paise
+  gstAmount         Int?          @map("gst_amount") // in paise
+  paidAt            DateTime      @map("paid_at")
+  createdAt         DateTime      @default(now()) @map("created_at")
+
+  // Relationships
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([subscriptionId])
+  @@index([status])
+  @@map("payments")
+}
+
+model WebhookEvent {
+  id              String    @id @default(uuid()) @db.Uuid
+  eventType       String    @map("event_type")
+  razorpayEventId String    @unique @map("razorpay_event_id")
+  payload         Json
+  processed       Boolean   @default(false)
+  processedAt     DateTime? @map("processed_at")
+  errorMessage    String?   @map("error_message")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@index([eventType])
+  @@index([processed])
+  @@map("webhook_events")
+}
+
+// ============================================
+// ANALYTICS MODELS
+// ============================================
+
+model PageAnalytics {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  sessionId String   @map("session_id")
+  eventName String   @map("event_name")
+  eventData Json?    @map("event_data")
+  pageUrl   String   @map("page_url")
+  referrer  String?
+  userAgent String   @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([eventName])
+  @@index([createdAt])
+  @@map("page_analytics")
+}
+
+model LLMUsage {
+  id               String      @id @default(uuid()) @db.Uuid
+  model            String
+  promptTokens     Int         @map("prompt_tokens")
+  completionTokens Int         @map("completion_tokens")
+  totalTokens      Int         @map("total_tokens")
+  estimatedCostUsd Decimal     @map("estimated_cost_usd") @db.Decimal(10, 6)
+  taskType         LLMTaskType @map("task_type")
+  companyId        String?     @map("company_id") @db.Uuid
+  durationMs       Int?        @map("duration_ms")
+  metadata         Json?
+  createdAt        DateTime    @default(now()) @map("created_at")
+
+  @@index([taskType])
+  @@index([companyId])
+  @@index([createdAt])
+  @@map("llm_usage")
+}
+
+// ============================================
+// MONITORING & ALERTING MODELS
+// ============================================
+
+enum AlertSeverity {
+  CRITICAL
+  WARNING
+  INFO
+}
+
+model AlertHistory {
+  id           String        @id @default(uuid()) @db.Uuid
+  severity     AlertSeverity
+  alertType    String        @map("alert_type")
+  message      String        @db.Text
+  metadata     Json?
+  acknowledged Boolean       @default(false)
+  createdAt    DateTime      @default(now()) @map("created_at")
+
+  @@index([severity])
+  @@index([alertType])
+  @@index([acknowledged])
+  @@index([createdAt])
+  @@map("alert_history")
+}
+
+model ErrorLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  errorType  String   @map("error_type")
+  message    String   @db.Text
+  stackTrace String?  @map("stack_trace") @db.Text
+  requestId  String?  @map("request_id")
+  userId     String?  @map("user_id") @db.Uuid
+  route      String?
+  metadata   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([errorType])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("error_log")
+}
+
+// ============================================
+// WEEKLY REPORTS MODELS
+// ============================================
+
+model WeeklyReport {
+  id            String     @id @default(uuid()) @db.Uuid
+  reportType    ReportType @map("report_type")
+  sectorId      String?    @map("sector_id") @db.Uuid
+  title         String
+  slug          String     @unique
+  coverImageUrl String?    @map("cover_image_url")
+  summary       String     @db.Text
+  fullContent   Json       @map("full_content")
+  publishedAt   DateTime?  @map("published_at")
+  fiscalWeek    Int        @map("fiscal_week")
+  fiscalYear    Int        @map("fiscal_year")
+  isPublished   Boolean    @default(false) @map("is_published")
+  viewCount     Int        @default(0) @map("view_count")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  // Relationships
+  sector          Sector?           @relation(fields: [sectorId], references: [id], onDelete: SetNull)
+  reportSections  ReportSection[]
+  newsletterQueue NewsletterQueue[]
+
+  @@unique([reportType, sectorId, fiscalYear, fiscalWeek])
+  @@index([reportType, isPublished, publishedAt])
+  @@index([sectorId, isPublished])
+  @@index([fiscalYear, fiscalWeek])
+  @@index([slug])
+  @@map("weekly_reports")
+}
+
+model ReportSection {
+  id           String      @id @default(uuid()) @db.Uuid
+  reportId     String      @map("report_id") @db.Uuid
+  sectionOrder Int         @map("section_order")
+  sectionTitle String      @map("section_title")
+  sectionType  SectionType @map("section_type")
+  content      Json
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  // Relationships
+  report WeeklyReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId, sectionOrder])
+  @@map("report_sections")
+}
+
+model NewsletterSubscriber {
+  id                String              @id @default(uuid()) @db.Uuid
+  userId            String?             @unique @map("user_id") @db.Uuid
+  email             String              @unique
+  subscribedSectors Json                @map("subscribed_sectors")
+  frequency         NewsletterFrequency @default(WEEKLY)
+  isActive          Boolean             @default(true) @map("is_active")
+  subscribedAt      DateTime            @default(now()) @map("subscribed_at")
+  unsubscribedAt    DateTime?           @map("unsubscribed_at")
+
+  // Relationships
+  user            User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  newsletterQueue NewsletterQueue[]
+
+  @@index([email])
+  @@index([isActive, frequency])
+  @@map("newsletter_subscribers")
+}
+
+model NewsletterQueue {
+  id           String    @id @default(uuid()) @db.Uuid
+  reportId     String    @map("report_id") @db.Uuid
+  subscriberId String    @map("subscriber_id") @db.Uuid
+  scheduledFor DateTime  @map("scheduled_for")
+  sentAt       DateTime? @map("sent_at")
+  status       String    @default("pending") // pending, sent, failed
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  // Relationships
+  report     WeeklyReport         @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  subscriber NewsletterSubscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@index([subscriberId, status])
+  @@index([reportId])
+  @@index([scheduledFor, status])
+  @@map("newsletter_queue")
+}
+
+// ============================================
+// STOCK EVENTS & COMPANY PROFILES (TASK #78 & #79)
+// ============================================
+
+model StockEvent {
+  id                String   @id @default(uuid()) @db.Uuid
+  companyId         String   @map("company_id") @db.Uuid
+  eventType         EventType @map("event_type")
+  eventDate         DateTime  @map("event_date")
+  impactAssessment  ImpactAssessment @map("impact_assessment")
+  title             String
+  description       String    @db.Text
+  metadata          Json      @default("{}")
+  sourceId          String?   @map("source_id")
+  sourceType        String?   @map("source_type")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([eventType])
+  @@index([eventDate(sort: Desc)])
+  @@index([impactAssessment])
+  @@index([companyId, eventDate(sort: Desc)])
+  @@index([sourceId, sourceType])
+  @@map("stock_events")
+}
+
+model StockMilestone {
+  id            String        @id @default(uuid()) @db.Uuid
+  companyId     String        @map("company_id") @db.Uuid
+  milestoneType MilestoneType @map("milestone_type")
+  milestoneDate DateTime      @map("milestone_date") @db.Date
+  title         String
+  description   String?       @db.Text
+  significance  Severity
+  metadata      Json          @default("{}")
+  createdAt     DateTime      @default(now()) @map("created_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([milestoneDate(sort: Desc)])
+  @@index([milestoneType])
+  @@index([companyId, milestoneDate(sort: Desc)])
+  @@map("stock_milestones")
+}
+
+model CompanyTimelineSummary {
+  id          String               @id @default(uuid()) @db.Uuid
+  companyId   String               @map("company_id") @db.Uuid
+  periodType  TimelinePeriodType   @map("period_type")
+  startDate   DateTime             @map("start_date") @db.Date
+  endDate     DateTime             @map("end_date") @db.Date
+  summaryText String               @map("summary_text") @db.Text
+  keyEvents   Json                 @default("[]") @map("key_events")
+  metrics     Json                 @default("{}")
+  aiGenerated Boolean              @default(false) @map("ai_generated")
+  createdAt   DateTime             @default(now()) @map("created_at")
+  updatedAt   DateTime             @updatedAt @map("updated_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([periodType])
+  @@index([startDate(sort: Desc), endDate(sort: Desc)])
+  @@index([companyId, periodType, startDate(sort: Desc)])
+  @@map("company_timeline_summaries")
+}
+
+model CompanyProfile {
+  id              String                     @id @default(uuid()) @db.Uuid
+  companyId       String                     @map("company_id") @db.Uuid
+  sectionType     CompanyProfileSectionType  @map("section_type")
+  content         Json                       @default("{}")
+  version         Int                        @default(1)
+  lastUpdated     DateTime                   @map("last_updated") @default(now())
+  sourceUrls      Json                       @default("[]") @map("source_urls")
+  confidenceLevel ConfidenceLevel            @map("confidence_level") @default(MEDIUM)
+  metadata        Json                       @default("{}")
+  createdAt       DateTime                   @default(now()) @map("created_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([sectionType])
+  @@index([companyId, sectionType])
+  @@index([companyId, sectionType, version(sort: Desc)])
+  @@index([lastUpdated(sort: Desc)])
+  @@map("company_profiles")
+}
+
+// ============================================
+// STOCK KNOWLEDGE REPOSITORY MODELS
+// ============================================
+
+model StockEvent {
+  id               String            @id @default(uuid()) @db.Uuid
+  companyId        String            @map("company_id") @db.Uuid
+  eventType        EventType         @map("event_type")
+  eventDate        DateTime          @map("event_date") @db.Date
+  title            String
+  summary          String            @db.Text
+  detailedContent  Json              @map("detailed_content")
+  impactAssessment ImpactAssessment  @map("impact_assessment")
+  impactAreas      String[]          @map("impact_areas")
+  sourceUrls       String[]          @map("source_urls")
+  sourceNames      String[]          @map("source_names")
+  aiGenerated      Boolean           @default(true) @map("ai_generated")
+  confidence       ConfidenceLevel
+  isVerified       Boolean           @default(false) @map("is_verified")
+  tags             String[]
+  fiscalYear       Int?              @map("fiscal_year")
+  fiscalQuarter    Int?              @map("fiscal_quarter")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, eventDate])
+  @@index([eventType, eventDate])
+  @@index([impactAssessment])
+  @@index([eventDate])
+  @@index([fiscalYear, fiscalQuarter])
+  @@index([isVerified])
+  @@map("stock_events")
+}
+
+model StockMilestone {
+  id           String        @id @default(uuid()) @db.Uuid
+  companyId    String        @map("company_id") @db.Uuid
+  milestoneType MilestoneType @map("milestone_type")
+  date         DateTime      @db.Date
+  title        String
+  description  String        @db.Text
+  significance String        @db.Text
+  relatedEventIds String[]   @map("related_event_ids") @db.Uuid
+  metadata     Json?
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, date])
+  @@index([milestoneType])
+  @@index([date])
+  @@map("stock_milestones")
+}
+
+model CompanyTimelineSummary {
+  id           String              @id @default(uuid()) @db.Uuid
+  companyId    String              @map("company_id") @db.Uuid
+  periodType   TimelinePeriodType  @map("period_type")
+  startDate    DateTime            @map("start_date") @db.Date
+  endDate      DateTime            @map("end_date") @db.Date
+  keyEvents    Json                @map("key_events")
+  majorChanges Json                @map("major_changes")
+  narrative    String              @db.Text
+  metrics      Json
+  generatedAt  DateTime            @default(now()) @map("generated_at")
+  updatedAt    DateTime            @updatedAt @map("updated_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, periodType])
+  @@index([companyId, periodType])
+  @@index([generatedAt])
+  @@map("company_timeline_summaries")
+}
+
+model CompanyProfile {
+  id          String                     @id @default(uuid()) @db.Uuid
+  companyId   String                     @map("company_id") @db.Uuid
+  sectionType CompanyProfileSectionType  @map("section_type")
+  content     Json
+  lastUpdated DateTime                   @default(now()) @map("last_updated")
+  createdAt   DateTime                   @default(now()) @map("created_at")
+  updatedAt   DateTime                   @updatedAt @map("updated_at")
+
+  // Relationships
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, sectionType])
+  @@index([companyId, sectionType])
+  @@map("company_profiles")
+}

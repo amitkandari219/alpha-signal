@@ -1,0 +1,61 @@
+/**
+ * Dark Mode Overrides - Safari Compatible
+ * No CSS variables - just direct color overrides
+ * MUST load after Tailwind utilities
+ */
+
+/* Dark mode background colors - High specificity */
+html.dark .bg-bg-primary,
+html.dark div.bg-bg-primary {
+  background-color: #0D1117 !important;
+}
+
+html.dark .bg-bg-secondary,
+html.dark div.bg-bg-secondary {
+  background-color: #161B22 !important;
+}
+
+html.dark .bg-bg-tertiary,
+html.dark div.bg-bg-tertiary {
+  background-color: #21262D !important;
+}
+
+/* Dark mode text colors */
+html.dark .text-text-primary { color: #E6EDF3 !important; }
+html.dark .text-text-secondary { color: #8B949E !important; }
+html.dark .text-text-muted { color: #484F58 !important; }
+
+/* Dark mode border colors */
+html.dark .border-border-default { border-color: #30363D !important; }
+html.dark .border-border-primary { border-color: #30363D !important; }
+
+/* Dark mode signal colors */
+html.dark .bg-signal-green { background-color: #3FB950 !important; }
+html.dark .bg-signal-red { background-color: #F85149 !important; }
+html.dark .bg-signal-yellow { background-color: #D29922 !important; }
+html.dark .bg-signal-purple { background-color: #A371F7 !important; }
+
+html.dark .text-signal-green { color: #3FB950 !important; }
+html.dark .text-signal-red { color: #F85149 !important; }
+html.dark .text-signal-yellow { color: #D29922 !important; }
+html.dark .text-signal-purple { color: #A371F7 !important; }
+
+/* Dark mode chart colors */
+html.dark .bg-chart-up { background-color: #26A69A !important; }
+html.dark .bg-chart-down { background-color: #EF5350 !important; }
+
+/* Dark mode body */
+html.dark body {
+  background-color: #0D1117 !important;
+  color: #E6EDF3 !important;
+}
+
+/* Dark mode header */
+html.dark header {
+  background-color: #161B22 !important;
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+}

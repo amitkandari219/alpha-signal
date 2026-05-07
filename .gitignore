@@ -1,0 +1,92 @@
+# =====================================================
+# Dependencies
+# =====================================================
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+venv/
+.venv/
+
+# =====================================================
+# Environment variables (NEVER commit)
+# =====================================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+!.env.example
+!.env.production.example
+
+# =====================================================
+# Build outputs
+# =====================================================
+dist/
+build/
+*.egg-info/
+.cache/
+*.tsbuildinfo
+
+# =====================================================
+# IDE / OS
+# =====================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# =====================================================
+# Logs
+# =====================================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+celerybeat-schedule
+celerybeat.pid
+
+# =====================================================
+# Testing
+# =====================================================
+coverage/
+.nyc_output/
+.pytest_cache/
+
+# =====================================================
+# Docker / Infra
+# =====================================================
+.docker/
+postgres-data/
+pgdata/
+redis-data/
+
+# =====================================================
+# Project-specific (NEVER commit these)
+# =====================================================
+
+# Build guide PDF (large, regeneratable from markdown)
+*.pdf
+
+# One-off generated stock reports (regenerated from data)
+DIVISLAB_*.txt
+DIVISLAB_*.md
+
+# Screenshots intermediate working files
+*.draft.png
+screenshots-wip/
+
+# =====================================================
+# Misc
+# =====================================================
+.turbo/
+.vercel/

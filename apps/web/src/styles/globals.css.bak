@@ -1,0 +1,554 @@
+/* Alpha Signal - Global Styles & Design System */
+/* Theme: Light/Dark Mode Support - Updated */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   Font Face Declarations with font-display: swap
+   ============================================ */
+
+/* Ensure fonts use swap display for better performance */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-display: swap;
+  src: local('Plus Jakarta Sans');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-display: swap;
+  src: local('JetBrains Mono');
+}
+
+/* ============================================
+   CSS Custom Properties (CSS Variables)
+   ============================================ */
+
+/* Light Mode (Default) - RGB tuples for Tailwind alpha support */
+:root {
+  /* Background colors - Light mode */
+  --color-bg-primary: 255 255 255;        /* White */
+  --color-bg-secondary: 249 250 251;      /* Light gray */
+  --color-bg-tertiary: 243 244 246;       /* Slightly darker gray */
+
+  /* Border colors */
+  --color-border-default: 229 231 235;    /* Light border */
+  --color-border-primary: 209 213 219;    /* Darker border */
+
+  /* Text colors */
+  --color-text-primary: 17 24 39;         /* Almost black */
+  --color-text-secondary: 107 114 128;    /* Medium gray */
+  --color-text-muted: 156 163 175;        /* Light gray */
+
+  /* Accent colors */
+  --color-accent-blue: 37 99 235;         /* Blue */
+
+  /* Signal colors */
+  --color-signal-green: 34 197 94;        /* Green */
+  --color-signal-red: 239 68 68;          /* Red */
+  --color-signal-yellow: 234 179 8;       /* Yellow/Gold */
+  --color-signal-purple: 168 85 247;      /* Purple */
+  --color-signal-blue: 59 130 246;        /* Blue */
+
+  /* Chart colors */
+  --color-chart-up: 34 197 94;            /* Green */
+  --color-chart-down: 239 68 68;          /* Red */
+
+  /* Legacy hex values for backwards compatibility */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F9FAFB;
+  --bg-tertiary: #F3F4F6;
+  --border-default: #E5E7EB;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --accent-blue: #2563EB;
+  --signal-green: #22C55E;
+  --signal-red: #EF4444;
+  --signal-yellow: #EAB308;
+  --signal-purple: #A855F7;
+  --chart-up: #22C55E;
+  --chart-down: #EF4444;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+}
+
+/* Dark Mode */
+.dark {
+  /* Background colors - Dark mode (GitHub inspired) */
+  --color-bg-primary: 13 17 23;           /* #0D1117 */
+  --color-bg-secondary: 22 27 34;         /* #161B22 */
+  --color-bg-tertiary: 33 38 45;          /* #21262D */
+
+  /* Border colors */
+  --color-border-default: 48 54 61;       /* #30363D */
+  --color-border-primary: 48 54 61;       /* #30363D */
+
+  /* Text colors */
+  --color-text-primary: 230 237 243;      /* #E6EDF3 */
+  --color-text-secondary: 139 148 158;    /* #8B949E */
+  --color-text-muted: 72 79 88;           /* #484F58 */
+
+  /* Accent colors */
+  --color-accent-blue: 88 166 255;        /* #58A6FF */
+
+  /* Signal colors */
+  --color-signal-green: 63 185 80;        /* #3FB950 */
+  --color-signal-red: 248 81 73;          /* #F85149 */
+  --color-signal-yellow: 210 153 34;      /* #D29922 */
+  --color-signal-purple: 163 113 247;     /* #A371F7 */
+  --color-signal-blue: 88 166 255;        /* #58A6FF */
+
+  /* Chart colors */
+  --color-chart-up: 38 166 154;           /* #26A69A */
+  --color-chart-down: 239 83 80;          /* #EF5350 */
+
+  /* Legacy hex values for backwards compatibility */
+  --bg-primary: #0D1117;
+  --bg-secondary: #161B22;
+  --bg-tertiary: #21262D;
+  --border-default: #30363D;
+  --text-primary: #E6EDF3;
+  --text-secondary: #8B949E;
+  --text-muted: #484F58;
+  --accent-blue: #58A6FF;
+  --signal-green: #3FB950;
+  --signal-red: #F85149;
+  --signal-yellow: #D29922;
+  --signal-purple: #A371F7;
+  --chart-up: #26A69A;
+  --chart-down: #EF5350;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  /* Smooth transitions for theme changes */
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+html {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ============================================
+   Typography
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+h1 { font-size: 2.25rem; }  /* 36px */
+h2 { font-size: 1.875rem; } /* 30px */
+h3 { font-size: 1.5rem; }   /* 24px */
+h4 { font-size: 1.25rem; }  /* 20px */
+h5 { font-size: 1.125rem; } /* 18px */
+h6 { font-size: 1rem; }     /* 16px */
+
+/* Data/Numeric Typography */
+.font-data,
+.numeric,
+[data-numeric="true"] {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+/* ============================================
+   Component Utilities
+   ============================================ */
+
+@layer components {
+  /* Data Card - Primary container for metrics/data */
+  .data-card {
+    @apply bg-bg-secondary border border-border-default rounded-card p-4;
+    @apply shadow-card hover:shadow-card-hover transition-shadow duration-200;
+  }
+
+  .data-card-elevated {
+    @apply data-card shadow-elevated bg-bg-tertiary;
+  }
+
+  /* Metric Display Variants */
+  .metric-positive {
+    @apply text-signal-green font-data font-semibold;
+  }
+
+  .metric-negative {
+    @apply text-signal-red font-data font-semibold;
+  }
+
+  .metric-neutral {
+    @apply text-signal-yellow font-data font-semibold;
+  }
+
+  /* Score Badge - For ratings, scores, confidence levels */
+  .score-badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-md;
+    @apply text-data-sm font-data font-medium;
+    @apply bg-bg-tertiary border border-border-default;
+  }
+
+  .score-badge-high {
+    @apply score-badge bg-signal-green/10 border-signal-green/30 text-signal-green;
+  }
+
+  .score-badge-medium {
+    @apply score-badge bg-signal-yellow/10 border-signal-yellow/30 text-signal-yellow;
+  }
+
+  .score-badge-low {
+    @apply score-badge bg-signal-red/10 border-signal-red/30 text-signal-red;
+  }
+
+  /* AI Badge - Indicator for AI-generated content */
+  .ai-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md;
+    @apply text-data-sm font-medium;
+    @apply bg-signal-purple/10 border border-signal-purple/30 text-signal-purple;
+  }
+
+  /* Data Table Styling */
+  .data-table {
+    @apply w-full border-collapse;
+  }
+
+  .data-table thead {
+    @apply border-b border-border-default;
+  }
+
+  .data-table th {
+    @apply px-4 py-3 text-left text-data-sm font-medium text-text-secondary uppercase tracking-wider;
+  }
+
+  .data-table td {
+    @apply px-4 py-3 text-data-base font-data border-t border-border-default;
+  }
+
+  .data-table tbody tr {
+    @apply hover:bg-bg-tertiary transition-colors duration-150;
+  }
+
+  /* Button Variants */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md;
+    @apply text-sm font-medium transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-blue;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent-blue text-white hover:bg-accent-blue/90;
+  }
+
+  .btn-secondary {
+    @apply btn bg-bg-tertiary text-text-primary border border-border-default;
+    @apply hover:bg-bg-secondary;
+  }
+
+  .btn-ghost {
+    @apply btn text-text-secondary hover:bg-bg-tertiary hover:text-text-primary;
+  }
+
+  /* Input Styling */
+  .input {
+    @apply w-full px-3 py-2 rounded-md;
+    @apply bg-bg-secondary border border-border-default;
+    @apply text-text-primary placeholder-text-muted;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent-blue focus:border-transparent;
+    @apply transition-all duration-200;
+  }
+
+  /* Chart Container */
+  .chart-container {
+    @apply data-card p-6;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4;
+  }
+
+  /* Terminal-like Panel */
+  .terminal-panel {
+    @apply bg-bg-primary border border-border-default rounded-lg p-4;
+    @apply font-data text-data-sm;
+  }
+
+  .terminal-header {
+    @apply flex items-center gap-2 mb-3 pb-2 border-b border-border-default;
+  }
+
+  .terminal-dot {
+    @apply w-3 h-3 rounded-full;
+  }
+
+  /* Candlestick Colors */
+  .candle-up {
+    @apply text-chart-up fill-chart-up;
+  }
+
+  .candle-down {
+    @apply text-chart-down fill-chart-down;
+  }
+
+  /* Percentage Change Display */
+  .change-positive::before {
+    content: '+';
+    @apply text-signal-green;
+  }
+
+  .change-negative::before {
+    content: '';
+  }
+
+  /* Loading Skeleton */
+  .skeleton {
+    @apply animate-pulse bg-bg-tertiary rounded;
+  }
+
+  /* Divider */
+  .divider {
+    @apply border-t border-border-default my-4;
+  }
+
+  /* Card Header */
+  .card-header {
+    @apply flex items-center justify-between mb-4 pb-3 border-b border-border-default;
+  }
+
+  .card-title {
+    @apply text-lg font-semibold text-text-primary;
+  }
+
+  /* Tooltip */
+  .tooltip {
+    @apply absolute z-50 px-2 py-1 text-data-xs;
+    @apply bg-bg-tertiary border border-border-default rounded shadow-elevated;
+    @apply pointer-events-none opacity-0 transition-opacity duration-200;
+  }
+
+  /* Link Styling */
+  .link {
+    @apply text-accent-blue hover:underline cursor-pointer;
+    @apply transition-colors duration-150;
+  }
+
+  /* Tag/Chip */
+  .tag {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-data-xs font-medium;
+    @apply bg-bg-tertiary border border-border-default text-text-secondary;
+  }
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+@layer utilities {
+  /* Text gradient for headings */
+  .text-gradient {
+    @apply bg-gradient-to-r from-accent-blue to-signal-purple bg-clip-text text-transparent;
+  }
+
+  /* Scrollbar styling */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--bg-tertiary);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: var(--border-default);
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Backdrop blur */
+  .backdrop-blur-panel {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Number formatting */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Page transition animation */
+  .animate-fade-in {
+    animation: fade-in 150ms ease-out;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* ============================================
+   Responsive Typography
+   ============================================ */
+
+@media (max-width: 640px) {
+  h1 { font-size: 1.875rem; } /* 30px */
+  h2 { font-size: 1.5rem; }   /* 24px */
+  h3 { font-size: 1.25rem; }  /* 20px */
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+
+  .data-card {
+    border: 1px solid #ddd;
+    box-shadow: none;
+  }
+}
+
+/* ============================================
+   Selection
+   ============================================ */
+
+::selection {
+  background-color: rgba(88, 166, 255, 0.3);
+  color: var(--text-primary);
+}
+
+::-moz-selection {
+  background-color: rgba(88, 166, 255, 0.3);
+  color: var(--text-primary);
+}
+
+/* ============================================
+   Risk Dashboard Animations
+   ============================================ */
+
+/* Pulsing red glow for flagged items */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(248, 81, 73, 0.4), 0 0 10px rgba(248, 81, 73, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(248, 81, 73, 0.6), 0 0 25px rgba(248, 81, 73, 0.3);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ============================================
+   Watchlist Price Flash Animations
+   ============================================ */
+
+/* Green flash for price increase */
+@keyframes flash-green {
+  0% {
+    background-color: rgba(63, 185, 80, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.animate-flash-green {
+  animation: flash-green 500ms ease-out;
+}
+
+/* Red flash for price decrease */
+@keyframes flash-red {
+  0% {
+    background-color: rgba(248, 81, 73, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.animate-flash-red {
+  animation: flash-red 500ms ease-out;
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+/* Dark Mode Overrides - Load AFTER Tailwind */
+@import './dark-mode.css';

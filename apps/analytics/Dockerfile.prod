@@ -1,0 +1,54 @@
+# Production Dockerfile for Python Analytics Service
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies including TA-Lib
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    make \
+    wget \
+    curl \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install TA-Lib C library
+RUN cd /tmp && \
+    wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
+    tar -xzf ta-lib-0.4.0-src.tar.gz && \
+    cd ta-lib/ && \
+    ./configure --prefix=/usr && \
+    make && \
+    make install && \
+    cd /tmp && \
+    rm -rf ta-lib ta-lib-0.4.0-src.tar.gz
+
+# Create non-root user
+RUN useradd -m -u 1001 celeryuser
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Create logs directory
+RUN mkdir -p /app/logs && chown -R celeryuser:celeryuser /app
+
+# Switch to non-root user
+USER celeryuser
+
+# Set Python path
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Health check (will be overridden for worker vs beat)
+HEALTHCHECK --interval=60s --timeout=20s --start-period=60s --retries=3 \
+  CMD celery -A src.celery_app inspect ping || exit 1
+
+# Default command (will be overridden in docker-compose)
+CMD ["celery", "-A", "src.celery_app", "worker", "--loglevel=info"]

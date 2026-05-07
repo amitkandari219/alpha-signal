@@ -1,0 +1,71 @@
+/**
+ * Theme CSS Variables
+ * Light and Dark mode color definitions
+ */
+
+/* Light Mode (Default) */
+:root {
+  /* Background colors - Light mode */
+  --color-bg-primary: 255 255 255;        /* White */
+  --color-bg-secondary: 249 250 251;      /* Light gray */
+  --color-bg-tertiary: 243 244 246;       /* Slightly darker gray */
+
+  /* Border colors */
+  --color-border-default: 229 231 235;    /* Light border */
+  --color-border-primary: 209 213 219;    /* Darker border */
+
+  /* Text colors */
+  --color-text-primary: 17 24 39;         /* Almost black */
+  --color-text-secondary: 107 114 128;    /* Medium gray */
+  --color-text-muted: 156 163 175;        /* Light gray */
+
+  /* Accent colors */
+  --color-accent-blue: 37 99 235;         /* Blue */
+
+  /* Signal colors */
+  --color-signal-green: 34 197 94;        /* Green */
+  --color-signal-red: 239 68 68;          /* Red */
+  --color-signal-yellow: 234 179 8;       /* Yellow/Gold */
+  --color-signal-purple: 168 85 247;      /* Purple */
+  --color-signal-blue: 59 130 246;        /* Blue */
+
+  /* Chart colors */
+  --color-chart-up: 34 197 94;            /* Green */
+  --color-chart-down: 239 68 68;          /* Red */
+}
+
+/* Dark Mode */
+.dark {
+  /* Background colors - Dark mode (GitHub inspired) */
+  --color-bg-primary: 13 17 23;           /* #0D1117 */
+  --color-bg-secondary: 22 27 34;         /* #161B22 */
+  --color-bg-tertiary: 33 38 45;          /* #21262D */
+
+  /* Border colors */
+  --color-border-default: 48 54 61;       /* #30363D */
+  --color-border-primary: 48 54 61;       /* #30363D */
+
+  /* Text colors */
+  --color-text-primary: 230 237 243;      /* #E6EDF3 */
+  --color-text-secondary: 139 148 158;    /* #8B949E */
+  --color-text-muted: 72 79 88;           /* #484F58 */
+
+  /* Accent colors */
+  --color-accent-blue: 88 166 255;        /* #58A6FF */
+
+  /* Signal colors */
+  --color-signal-green: 63 185 80;        /* #3FB950 */
+  --color-signal-red: 248 81 73;          /* #F85149 */
+  --color-signal-yellow: 210 153 34;      /* #D29922 */
+  --color-signal-purple: 163 113 247;     /* #A371F7 */
+  --color-signal-blue: 88 166 255;        /* #58A6FF */
+
+  /* Chart colors */
+  --color-chart-up: 38 166 154;           /* #26A69A */
+  --color-chart-down: 239 83 80;          /* #EF5350 */
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}

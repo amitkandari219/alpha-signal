@@ -1,0 +1,587 @@
+/**
+ * Mock Sector Data
+ *
+ * Data for 15+ Indian market sectors with performance metrics and stocks
+ */
+
+export interface SectorStock {
+  symbol: string;
+  companyName: string;
+  cmp: number;
+  changePercent: number;
+  marketCap: number;
+  qualityScore: number;
+  growthScore: number;
+  riskScore: number;
+  momentumScore: number;
+  pe: number;
+  roe: number;
+}
+
+export interface SectorPerformance {
+  sectorId: string;
+  sectorName: string;
+  stockCount: number;
+  change1D: number;
+  change1W: number;
+  change1M: number;
+  change3M: number;
+  change6M: number;
+  change1Y: number;
+  avgQualityScore: number;
+  momentumRating: 'Strong' | 'Moderate' | 'Weak' | 'Negative';
+  totalMarketCap: number; // in crores
+  topGainer: string;
+  topLoser: string;
+}
+
+export interface SectorDetail {
+  sectorId: string;
+  sectorName: string;
+  stockCount: number;
+  aiSummary: {
+    businessCyclePosition: string;
+    tailwinds: string[];
+    headwinds: string[];
+  };
+  tailwindScore: number;
+  topStocks: SectorStock[];
+  vsMarketData: Array<{
+    date: string;
+    sectorIndex: number;
+    nifty500: number;
+  }>;
+  fiiDiiFlow: Array<{
+    quarter: string;
+    fiiFlow: number; // in crores
+    diiFlow: number;
+  }>;
+}
+
+export const sectorPerformanceData: SectorPerformance[] = [
+  {
+    sectorId: 'it-services',
+    sectorName: 'IT Services',
+    stockCount: 45,
+    change1D: 1.2,
+    change1W: 3.4,
+    change1M: 5.6,
+    change3M: 12.3,
+    change6M: 18.7,
+    change1Y: 24.5,
+    avgQualityScore: 76,
+    momentumRating: 'Strong',
+    totalMarketCap: 1850000,
+    topGainer: 'TCS',
+    topLoser: 'WIPRO',
+  },
+  {
+    sectorId: 'pharmaceuticals',
+    sectorName: 'Pharmaceuticals',
+    stockCount: 38,
+    change1D: 0.8,
+    change1W: 2.1,
+    change1M: 4.3,
+    change3M: 8.9,
+    change6M: 15.2,
+    change1Y: 28.6,
+    avgQualityScore: 74,
+    momentumRating: 'Strong',
+    totalMarketCap: 980000,
+    topGainer: 'DRREDDY',
+    topLoser: 'APOLLOHOSP',
+  },
+  {
+    sectorId: 'banking',
+    sectorName: 'Banking',
+    stockCount: 52,
+    change1D: -0.5,
+    change1W: 1.2,
+    change1M: 3.8,
+    change3M: 10.5,
+    change6M: 22.3,
+    change1Y: 35.7,
+    avgQualityScore: 72,
+    momentumRating: 'Strong',
+    totalMarketCap: 2340000,
+    topGainer: 'HDFCBANK',
+    topLoser: 'PNB',
+  },
+  {
+    sectorId: 'auto',
+    sectorName: 'Automobile',
+    stockCount: 42,
+    change1D: 1.8,
+    change1W: 4.2,
+    change1M: 8.5,
+    change3M: 15.8,
+    change6M: 28.4,
+    change1Y: 42.3,
+    avgQualityScore: 70,
+    momentumRating: 'Strong',
+    totalMarketCap: 1120000,
+    topGainer: 'MARUTI',
+    topLoser: 'TATAMOTORS',
+  },
+  {
+    sectorId: 'chemicals',
+    sectorName: 'Specialty Chemicals',
+    stockCount: 35,
+    change1D: 2.3,
+    change1W: 5.1,
+    change1M: 9.2,
+    change3M: 18.6,
+    change6M: 25.3,
+    change1Y: 38.9,
+    avgQualityScore: 75,
+    momentumRating: 'Strong',
+    totalMarketCap: 680000,
+    topGainer: 'GRASIM',
+    topLoser: 'HINDALCO',
+  },
+  {
+    sectorId: 'capital-goods',
+    sectorName: 'Capital Goods',
+    stockCount: 48,
+    change1D: 1.5,
+    change1W: 3.8,
+    change1M: 7.2,
+    change3M: 16.5,
+    change6M: 32.8,
+    change1Y: 55.2,
+    avgQualityScore: 73,
+    momentumRating: 'Strong',
+    totalMarketCap: 920000,
+    topGainer: 'ABB',
+    topLoser: 'BHEL',
+  },
+  {
+    sectorId: 'fmcg',
+    sectorName: 'FMCG',
+    stockCount: 32,
+    change1D: 0.3,
+    change1W: 1.5,
+    change1M: 2.8,
+    change3M: 5.2,
+    change6M: 8.9,
+    change1Y: 12.4,
+    avgQualityScore: 78,
+    momentumRating: 'Moderate',
+    totalMarketCap: 1450000,
+    topGainer: 'HINDUNILVR',
+    topLoser: 'ITC',
+  },
+  {
+    sectorId: 'metals',
+    sectorName: 'Metals & Mining',
+    stockCount: 40,
+    change1D: -1.2,
+    change1W: -2.8,
+    change1M: -5.3,
+    change3M: -8.7,
+    change6M: 2.5,
+    change1Y: 18.6,
+    avgQualityScore: 65,
+    momentumRating: 'Weak',
+    totalMarketCap: 780000,
+    topGainer: 'TATASTEEL',
+    topLoser: 'HINDALCO',
+  },
+  {
+    sectorId: 'realty',
+    sectorName: 'Real Estate',
+    stockCount: 28,
+    change1D: 0.9,
+    change1W: 2.5,
+    change1M: 6.8,
+    change3M: 14.2,
+    change6M: 28.5,
+    change1Y: 48.3,
+    avgQualityScore: 62,
+    momentumRating: 'Strong',
+    totalMarketCap: 420000,
+    topGainer: 'DLF',
+    topLoser: 'PRESTIGE',
+  },
+  {
+    sectorId: 'infrastructure',
+    sectorName: 'Infrastructure',
+    stockCount: 36,
+    change1D: 1.1,
+    change1W: 3.2,
+    change1M: 7.8,
+    change3M: 18.5,
+    change6M: 35.2,
+    change1Y: 62.7,
+    avgQualityScore: 68,
+    momentumRating: 'Strong',
+    totalMarketCap: 680000,
+    topGainer: 'LTIM',
+    topLoser: 'IRVL',
+  },
+  {
+    sectorId: 'consumer-durables',
+    sectorName: 'Consumer Durables',
+    stockCount: 25,
+    change1D: 1.8,
+    change1W: 4.5,
+    change1M: 9.8,
+    change3M: 22.4,
+    change6M: 38.6,
+    change1Y: 58.9,
+    avgQualityScore: 76,
+    momentumRating: 'Strong',
+    totalMarketCap: 520000,
+    topGainer: 'TITAN',
+    topLoser: 'WHIRLPOOL',
+  },
+  {
+    sectorId: 'telecom',
+    sectorName: 'Telecom',
+    stockCount: 12,
+    change1D: -0.8,
+    change1W: 0.5,
+    change1M: 2.3,
+    change3M: 8.5,
+    change6M: 18.2,
+    change1Y: 32.5,
+    avgQualityScore: 58,
+    momentumRating: 'Moderate',
+    totalMarketCap: 650000,
+    topGainer: 'BHARTIARTL',
+    topLoser: 'IDEA',
+  },
+  {
+    sectorId: 'energy',
+    sectorName: 'Energy',
+    stockCount: 22,
+    change1D: 0.6,
+    change1W: 1.8,
+    change1M: 3.5,
+    change3M: 7.2,
+    change6M: 12.8,
+    change1Y: 22.4,
+    avgQualityScore: 70,
+    momentumRating: 'Moderate',
+    totalMarketCap: 1280000,
+    topGainer: 'RELIANCE',
+    topLoser: 'ONGC',
+  },
+  {
+    sectorId: 'media',
+    sectorName: 'Media & Entertainment',
+    stockCount: 18,
+    change1D: -0.3,
+    change1W: 1.2,
+    change1M: 3.8,
+    change3M: 5.6,
+    change6M: 8.2,
+    change1Y: 15.7,
+    avgQualityScore: 64,
+    momentumRating: 'Moderate',
+    totalMarketCap: 280000,
+    topGainer: 'ZEEL',
+    topLoser: 'PVR',
+  },
+  {
+    sectorId: 'textiles',
+    sectorName: 'Textiles',
+    stockCount: 30,
+    change1D: 0.4,
+    change1W: 1.8,
+    change1M: 4.2,
+    change3M: 8.5,
+    change6M: 15.8,
+    change1Y: 28.3,
+    avgQualityScore: 66,
+    momentumRating: 'Moderate',
+    totalMarketCap: 380000,
+    topGainer: 'RAYMOND',
+    topLoser: 'ARVIND',
+  },
+  {
+    sectorId: 'aviation',
+    sectorName: 'Aviation',
+    stockCount: 8,
+    change1D: 2.5,
+    change1W: 6.8,
+    change1M: 12.5,
+    change3M: 28.4,
+    change6M: 45.2,
+    change1Y: 68.5,
+    avgQualityScore: 55,
+    momentumRating: 'Strong',
+    totalMarketCap: 180000,
+    topGainer: 'INDIGO',
+    topLoser: 'SPICEJET',
+  },
+  {
+    sectorId: 'insurance',
+    sectorName: 'Insurance',
+    stockCount: 15,
+    change1D: 0.7,
+    change1W: 2.3,
+    change1M: 5.8,
+    change3M: 12.4,
+    change6M: 24.5,
+    change1Y: 38.2,
+    avgQualityScore: 71,
+    momentumRating: 'Strong',
+    totalMarketCap: 720000,
+    topGainer: 'HDFCLIFE',
+    topLoser: 'SBILIFE',
+  },
+];
+
+// Detailed sector data (example for IT Services)
+export const sectorDetailData: Record<string, SectorDetail> = {
+  'it-services': {
+    sectorId: 'it-services',
+    sectorName: 'IT Services',
+    stockCount: 45,
+    aiSummary: {
+      businessCyclePosition: 'Mid-Expansion Phase',
+      tailwinds: [
+        'Strong digital transformation demand in BFSI and retail sectors',
+        'Cloud migration acceleration driving deal wins',
+        'AI/ML services gaining traction with premium pricing',
+        'Healthy deal pipeline with large deal momentum',
+        'Rupee depreciation providing tailwind to margins',
+      ],
+      headwinds: [
+        'High attrition rates pressuring wage costs',
+        'Slowing discretionary spending in US/Europe',
+        'Visa policy changes impacting onsite deployments',
+        'Rising competition from global capability centers',
+      ],
+    },
+    tailwindScore: 72,
+    topStocks: [
+      {
+        symbol: 'TCS',
+        companyName: 'Persistent Systems',
+        cmp: 5245.30,
+        changePercent: 2.4,
+        marketCap: 41230,
+        qualityScore: 78,
+        growthScore: 82,
+        riskScore: 35,
+        momentumScore: 75,
+        pe: 45.2,
+        roe: 21.4,
+      },
+      {
+        symbol: 'INFY',
+        companyName: 'Coforge Ltd',
+        cmp: 6320.40,
+        changePercent: 1.8,
+        marketCap: 42150,
+        qualityScore: 72,
+        growthScore: 76,
+        riskScore: 38,
+        momentumScore: 68,
+        pe: 42.8,
+        roe: 18.5,
+      },
+      {
+        symbol: 'WIPRO',
+        companyName: 'Wipro Limited',
+        cmp: 1025.60,
+        changePercent: -0.5,
+        marketCap: 13800,
+        qualityScore: 75,
+        growthScore: 72,
+        riskScore: 40,
+        momentumScore: 70,
+        pe: 48.5,
+        roe: 19.8,
+      },
+      {
+        symbol: 'LTIM',
+        companyName: 'LTIMindtree Limited',
+        cmp: 4850.20,
+        changePercent: 1.2,
+        marketCap: 51200,
+        qualityScore: 76,
+        growthScore: 71,
+        riskScore: 36,
+        momentumScore: 71,
+        pe: 44.5,
+        roe: 20.2,
+      },
+      {
+        symbol: 'TECHM',
+        companyName: 'Tech Mahindra Limited',
+        cmp: 2340.80,
+        changePercent: -1.2,
+        marketCap: 44800,
+        qualityScore: 73,
+        growthScore: 68,
+        riskScore: 42,
+        momentumScore: 58,
+        pe: 38.6,
+        roe: 17.8,
+      },
+    ],
+    vsMarketData: [
+      { date: '2025-08', sectorIndex: 100, nifty500: 100 },
+      { date: '2025-09', sectorIndex: 105, nifty500: 102 },
+      { date: '2025-10', sectorIndex: 108, nifty500: 104 },
+      { date: '2025-11', sectorIndex: 112, nifty500: 106 },
+      { date: '2025-12', sectorIndex: 118, nifty500: 108 },
+      { date: '2026-01', sectorIndex: 122, nifty500: 110 },
+      { date: '2026-02', sectorIndex: 125, nifty500: 112 },
+    ],
+    fiiDiiFlow: [
+      { quarter: 'Q1 FY25', fiiFlow: 2850, diiFlow: 4200 },
+      { quarter: 'Q2 FY25', fiiFlow: 3200, diiFlow: 3800 },
+      { quarter: 'Q3 FY25', fiiFlow: 1900, diiFlow: 5100 },
+      { quarter: 'Q4 FY25', fiiFlow: 2400, diiFlow: 4600 },
+    ],
+  },
+  // Add other sectors as needed
+  pharmaceuticals: {
+    sectorId: 'pharmaceuticals',
+    sectorName: 'Pharmaceuticals',
+    stockCount: 38,
+    aiSummary: {
+      businessCyclePosition: 'Late-Expansion Phase',
+      tailwinds: [
+        'Strong US generic approvals pipeline',
+        'API export demand from regulated markets',
+        'India domestic formulations growth at 8-10%',
+        'CDMO opportunities from China+1 strategy',
+        'Biosimilars gaining market share globally',
+      ],
+      headwinds: [
+        'Pricing pressure in US generics market',
+        'Regulatory challenges and observation notices',
+        'Rising R&D costs for complex molecules',
+        'Competition from low-cost manufacturers',
+      ],
+    },
+    tailwindScore: 68,
+    topStocks: [
+      {
+        symbol: 'DRREDDY',
+        companyName: 'Dr Reddys Laboratories',
+        cmp: 5840.20,
+        changePercent: 0.6,
+        marketCap: 97200,
+        qualityScore: 80,
+        growthScore: 70,
+        riskScore: 38,
+        momentumScore: 67,
+        pe: 42.3,
+        roe: 18.5,
+      },
+      {
+        symbol: 'SUNPHARMA',
+        companyName: 'Sun Pharmaceutical',
+        cmp: 1640.80,
+        changePercent: 0.9,
+        marketCap: 393600,
+        qualityScore: 78,
+        growthScore: 68,
+        riskScore: 40,
+        momentumScore: 70,
+        pe: 38.6,
+        roe: 17.2,
+      },
+      {
+        symbol: 'CIPLA',
+        companyName: 'Cipla Ltd',
+        cmp: 1385.40,
+        changePercent: -0.3,
+        marketCap: 111600,
+        qualityScore: 76,
+        growthScore: 65,
+        riskScore: 42,
+        momentumScore: 62,
+        pe: 35.8,
+        roe: 16.4,
+      },
+      {
+        symbol: 'DIVISLAB',
+        companyName: 'Laurus Labs',
+        cmp: 485.60,
+        changePercent: 1.5,
+        marketCap: 12850,
+        qualityScore: 72,
+        growthScore: 68,
+        riskScore: 48,
+        momentumScore: 58,
+        pe: 22.4,
+        roe: 16.5,
+      },
+      {
+        symbol: 'APOLLOHOSP',
+        companyName: 'Apollo Hospitals Enterprise Limited',
+        cmp: 285.70,
+        changePercent: -1.8,
+        marketCap: 34200,
+        qualityScore: 65,
+        growthScore: 62,
+        riskScore: 55,
+        momentumScore: 48,
+        pe: 28.5,
+        roe: 12.8,
+      },
+    ],
+    vsMarketData: [
+      { date: '2025-08', sectorIndex: 100, nifty500: 100 },
+      { date: '2025-09', sectorIndex: 103, nifty500: 102 },
+      { date: '2025-10', sectorIndex: 107, nifty500: 104 },
+      { date: '2025-11', sectorIndex: 111, nifty500: 106 },
+      { date: '2025-12', sectorIndex: 116, nifty500: 108 },
+      { date: '2026-01', sectorIndex: 121, nifty500: 110 },
+      { date: '2026-02', sectorIndex: 129, nifty500: 112 },
+    ],
+    fiiDiiFlow: [
+      { quarter: 'Q1 FY25', fiiFlow: 1850, diiFlow: 2400 },
+      { quarter: 'Q2 FY25', fiiFlow: 2100, diiFlow: 2200 },
+      { quarter: 'Q3 FY25', fiiFlow: 1600, diiFlow: 2800 },
+      { quarter: 'Q4 FY25', fiiFlow: 1900, diiFlow: 2600 },
+    ],
+  },
+};
+
+// Generate mock detail data for all sectors
+export const getAllSectorDetails = (): Record<string, SectorDetail> => {
+  const details: Record<string, SectorDetail> = { ...sectorDetailData };
+
+  // For sectors without detailed data, generate basic structure
+  sectorPerformanceData.forEach((sector) => {
+    if (!details[sector.sectorId]) {
+      details[sector.sectorId] = {
+        sectorId: sector.sectorId,
+        sectorName: sector.sectorName,
+        stockCount: sector.stockCount,
+        aiSummary: {
+          businessCyclePosition: 'Mid-Cycle',
+          tailwinds: ['Market tailwind 1', 'Market tailwind 2', 'Market tailwind 3'],
+          headwinds: ['Market headwind 1', 'Market headwind 2'],
+        },
+        tailwindScore: sector.avgQualityScore,
+        topStocks: [],
+        vsMarketData: [
+          { date: '2025-08', sectorIndex: 100, nifty500: 100 },
+          { date: '2025-09', sectorIndex: 100 + sector.change1M / 6, nifty500: 102 },
+          { date: '2025-10', sectorIndex: 100 + sector.change1M / 4, nifty500: 104 },
+          { date: '2025-11', sectorIndex: 100 + sector.change1M / 2, nifty500: 106 },
+          { date: '2025-12', sectorIndex: 100 + sector.change1M, nifty500: 108 },
+          { date: '2026-01', sectorIndex: 100 + sector.change1M * 1.2, nifty500: 110 },
+          { date: '2026-02', sectorIndex: 100 + sector.change1M * 1.5, nifty500: 112 },
+        ],
+        fiiDiiFlow: [
+          { quarter: 'Q1 FY25', fiiFlow: Math.random() * 3000, diiFlow: Math.random() * 4000 },
+          { quarter: 'Q2 FY25', fiiFlow: Math.random() * 3000, diiFlow: Math.random() * 4000 },
+          { quarter: 'Q3 FY25', fiiFlow: Math.random() * 3000, diiFlow: Math.random() * 4000 },
+          { quarter: 'Q4 FY25', fiiFlow: Math.random() * 3000, diiFlow: Math.random() * 4000 },
+        ],
+      };
+    }
+  });
+
+  return details;
+};

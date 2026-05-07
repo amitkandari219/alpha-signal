@@ -1,0 +1,94 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  deploy:
+    name: Deploy to Production Server
+    runs-on: ubuntu-latest
+
+    # Only run on main branch
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+          SSH_HOST: ${{ secrets.PRODUCTION_HOST }}
+          SSH_USER: ${{ secrets.PRODUCTION_USER }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
+
+      - name: Deploy to production
+        env:
+          SSH_HOST: ${{ secrets.PRODUCTION_HOST }}
+          SSH_USER: ${{ secrets.PRODUCTION_USER }}
+        run: |
+          ssh -i ~/.ssh/deploy_key $SSH_USER@$SSH_HOST << 'ENDSSH'
+            set -e
+            echo "🚀 Starting deployment..."
+
+            # Navigate to project directory
+            cd /opt/alphasignal
+
+            # Pull latest changes
+            echo "📥 Pulling latest changes..."
+            git pull origin main
+
+            # Build and restart services
+            echo "🏗️  Building updated images..."
+            make prod-build
+
+            echo "🔄 Restarting services..."
+            make prod-up
+
+            # Wait for services to be ready
+            echo "⏳ Waiting for services to start..."
+            sleep 30
+
+            # Check health
+            echo "🏥 Checking system health..."
+            curl -f http://localhost/health/full || {
+              echo "❌ Health check failed!"
+              exit 1
+            }
+
+            echo "✅ Deployment successful!"
+          ENDSSH
+
+      - name: Verify deployment
+        env:
+          PRODUCTION_URL: ${{ secrets.PRODUCTION_URL }}
+        run: |
+          echo "🔍 Verifying deployment at $PRODUCTION_URL..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" $PRODUCTION_URL/health)
+          if [ $response -eq 200 ]; then
+            echo "✅ Production is healthy (HTTP $response)"
+          else
+            echo "❌ Production health check failed (HTTP $response)"
+            exit 1
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          # TODO: Add Slack/email notification here
+          # Example: curl -X POST -H 'Content-type: application/json' \
+          #   --data '{"text":"Deployment to production failed!"}' \
+          #   ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key

@@ -1,0 +1,91 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        // Background colors - RGBA format for Safari compatibility
+        bg: {
+          primary: 'rgba(var(--color-bg-primary), <alpha-value>)',
+          secondary: 'rgba(var(--color-bg-secondary), <alpha-value>)',
+          tertiary: 'rgba(var(--color-bg-tertiary), <alpha-value>)',
+        },
+        // Border colors
+        border: {
+          default: 'rgba(var(--color-border-default), <alpha-value>)',
+          primary: 'rgba(var(--color-border-primary), <alpha-value>)',
+        },
+        // Text colors
+        text: {
+          primary: 'rgba(var(--color-text-primary), <alpha-value>)',
+          secondary: 'rgba(var(--color-text-secondary), <alpha-value>)',
+          muted: 'rgba(var(--color-text-muted), <alpha-value>)',
+        },
+        // Accent colors
+        accent: {
+          blue: 'rgba(var(--color-accent-blue), <alpha-value>)',
+        },
+        // Signal colors for metrics
+        signal: {
+          green: 'rgba(var(--color-signal-green), <alpha-value>)',
+          red: 'rgba(var(--color-signal-red), <alpha-value>)',
+          yellow: 'rgba(var(--color-signal-yellow), <alpha-value>)',
+          purple: 'rgba(var(--color-signal-purple), <alpha-value>)',
+          blue: 'rgba(var(--color-signal-blue), <alpha-value>)',
+        },
+        // Chart colors
+        chart: {
+          up: 'rgba(var(--color-chart-up), <alpha-value>)',
+          down: 'rgba(var(--color-chart-down), <alpha-value>)',
+        },
+      },
+      fontFamily: {
+        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
+        heading: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        data: ['"JetBrains Mono"', 'monospace'],
+      },
+      fontSize: {
+        'data-xs': ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.02em' }],      // 11px
+        'data-sm': ['0.75rem', { lineHeight: '1.125rem', letterSpacing: '0.01em' }],    // 12px
+        'data-base': ['0.875rem', { lineHeight: '1.375rem', letterSpacing: '0.01em' }], // 14px
+        'data-lg': ['1rem', { lineHeight: '1.5rem', letterSpacing: '0.01em' }],         // 16px
+        'data-xl': ['1.125rem', { lineHeight: '1.75rem', letterSpacing: '0.01em' }],    // 18px
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+      },
+      borderRadius: {
+        'card': '0.5rem',
+        'panel': '0.75rem',
+      },
+      boxShadow: {
+        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.24)',
+        'card-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.36)',
+        'elevated': '0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.36)',
+      },
+      animation: {
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'fade-in': 'fadeIn 0.3s ease-in-out',
+        'slide-up': 'slideUp 0.3s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+      },
+    },
+  },
+  plugins: [],
+}

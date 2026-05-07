@@ -1,0 +1,101 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: alpha-signal-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-alphasignal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-alphasignal_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-alphasignal}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-timescaledb.sql:/docker-entrypoint-initdb.d/init-timescaledb.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-alphasignal}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: alpha-signal-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-alphasignal_redis_dev}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: alpha-signal-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-alphasignal}:${POSTGRES_PASSWORD:-alphasignal_dev_password}@postgres:5432/${POSTGRES_DB:-alphasignal}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-alphasignal_redis_dev}@redis:6379
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./apps/api/src:/app/apps/api/src
+      - ./apps/api/prisma:/app/apps/api/prisma
+    command: sh -c "npx prisma migrate deploy && node dist/index.js"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: alpha-signal-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "3020:80"
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
+      VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:4000}
+
+  analytics-worker:
+    build:
+      context: .
+      dockerfile: apps/analytics/Dockerfile
+    container_name: alpha-signal-analytics-worker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD:-alphasignal_redis_dev}@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD:-alphasignal_redis_dev}@redis:6379/0
+      DATABASE_URL: postgresql://${POSTGRES_USER:-alphasignal}:${POSTGRES_PASSWORD:-alphasignal_dev_password}@postgres:5432/${POSTGRES_DB:-alphasignal}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-alphasignal_redis_dev}@redis:6379
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      PYTHONUNBUFFERED: 1
+    volumes:
+      - ./apps/analytics/src:/app/src
+
+volumes:
+  postgres_data:
+  redis_data:

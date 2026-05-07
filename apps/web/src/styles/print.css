@@ -1,0 +1,217 @@
+/**
+ * Print-Friendly CSS for Stock Reports
+ *
+ * Optimizes report layout for PDF export and print (Cmd+P)
+ */
+
+@media print {
+  /* Hide UI elements that shouldn't appear in PDF */
+  .no-print,
+  .navbar,
+  .sidebar,
+  header,
+  footer,
+  button,
+  .btn,
+  nav,
+  .sticky,
+  .fixed {
+    display: none !important;
+  }
+
+  /* Force light background for readability */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Page breaks */
+  .report-section {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  /* Ensure sections start on new page if needed */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  /* Force backgrounds for charts */
+  .chart-container,
+  .infographic,
+  svg {
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Adjust dark theme colors for print */
+  .bg-bg-primary {
+    background: white !important;
+  }
+
+  .bg-bg-secondary {
+    background: #f9fafb !important;
+    border: 1px solid #e5e7eb !important;
+  }
+
+  .bg-bg-tertiary {
+    background: #f3f4f6 !important;
+  }
+
+  /* Text colors for print */
+  .text-text-primary {
+    color: #111827 !important;
+  }
+
+  .text-text-secondary {
+    color: #6b7280 !important;
+  }
+
+  .text-text-muted {
+    color: #9ca3af !important;
+  }
+
+  /* Preserve colors for signals */
+  .text-signal-green,
+  .bg-signal-green {
+    color: #10b981 !important;
+    background-color: #d1fae5 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .text-signal-red,
+  .bg-signal-red {
+    color: #ef4444 !important;
+    background-color: #fee2e2 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .text-signal-yellow,
+  .bg-signal-yellow {
+    color: #f59e0b !important;
+    background-color: #fef3c7 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .text-accent-blue,
+  .bg-accent-blue {
+    color: #3b82f6 !important;
+    background-color: #dbeafe !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Borders */
+  .border-border-default {
+    border-color: #e5e7eb !important;
+  }
+
+  /* Tables */
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  /* Optimize chart sizes */
+  .chart-container svg {
+    max-height: 400px;
+  }
+
+  /* Reduce excessive whitespace */
+  .space-y-6 > * + * {
+    margin-top: 1.5rem !important;
+  }
+
+  .space-y-4 > * + * {
+    margin-top: 1rem !important;
+  }
+
+  /* Links */
+  a {
+    color: #3b82f6 !important;
+    text-decoration: underline;
+  }
+
+  /* Make sure all content is visible */
+  * {
+    overflow: visible !important;
+  }
+
+  /* Font adjustments */
+  body {
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  h1 {
+    font-size: 24pt;
+  }
+
+  h2 {
+    font-size: 18pt;
+  }
+
+  h3 {
+    font-size: 14pt;
+  }
+
+  h4 {
+    font-size: 12pt;
+  }
+
+  /* Badges and pills */
+  .badge,
+  .pill {
+    border: 1px solid currentColor;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* Shadow removal for print */
+  * {
+    box-shadow: none !important;
+  }
+}
+
+/* Print mode indicator (shows when ?print=true) */
+.print-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #3b82f6;
+  color: white;
+  text-align: center;
+  padding: 10px;
+  z-index: 9999;
+  font-weight: bold;
+}
+
+@media print {
+  .print-mode {
+    display: none !important;
+  }
+}
+
+/* Report ready indicator (for Puppeteer to wait for) */
+/* Note: Class is used by Puppeteer's waitForSelector, no styling needed */

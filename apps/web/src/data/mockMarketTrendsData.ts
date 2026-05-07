@@ -1,0 +1,323 @@
+/**
+ * Mock Market Trends Data
+ *
+ * Data for market indices, breadth, FII/DII flows, sector rotation, and active stocks
+ */
+
+export interface IndexData {
+  name: string;
+  symbol: string;
+  current: number;
+  change: number;
+  changePercent: number;
+  high52w: number;
+  low52w: number;
+  intradayData: Array<{ time: string; value: number }>;
+}
+
+export interface MarketBreadth {
+  advances: number;
+  declines: number;
+  unchanged: number;
+  newHighs: number;
+  newLows: number;
+  above200DMA: number; // percentage
+}
+
+export interface FIIDIIFlow {
+  date: string;
+  fiiBuy: number;
+  fiiSell: number;
+  fiiNet: number;
+  diiBuy: number;
+  diiSell: number;
+  diiNet: number;
+}
+
+export interface SectorRotation {
+  sectorId: string;
+  sectorName: string;
+  relativePerformance: number; // 1M relative to market
+  momentumChange: number; // 1M momentum change
+}
+
+export interface ActiveStock {
+  symbol: string;
+  companyName: string;
+  cmp: number;
+  change: number;
+  changePercent: number;
+  volume: number;
+  value: number; // in crores
+  high52w?: number;
+  low52w?: number;
+}
+
+// Index Data
+export const indicesData: IndexData[] = [
+  {
+    name: 'Nifty 50',
+    symbol: 'NIFTY',
+    current: 24850.50,
+    change: 142.30,
+    changePercent: 0.58,
+    high52w: 26277.35,
+    low52w: 21281.45,
+    intradayData: [
+      { time: '09:15', value: 24708 },
+      { time: '10:00', value: 24745 },
+      { time: '11:00', value: 24782 },
+      { time: '12:00', value: 24820 },
+      { time: '13:00', value: 24795 },
+      { time: '14:00', value: 24835 },
+      { time: '15:00', value: 24860 },
+      { time: '15:30', value: 24850 },
+    ],
+  },
+  {
+    name: 'Nifty Midcap 100',
+    symbol: 'NIFTYMID100',
+    current: 58420.80,
+    change: 425.60,
+    changePercent: 0.73,
+    high52w: 62480.50,
+    low52w: 48220.30,
+    intradayData: [
+      { time: '09:15', value: 57995 },
+      { time: '10:00', value: 58150 },
+      { time: '11:00', value: 58280 },
+      { time: '12:00', value: 58350 },
+      { time: '13:00', value: 58290 },
+      { time: '14:00', value: 58380 },
+      { time: '15:00', value: 58440 },
+      { time: '15:30', value: 58420 },
+    ],
+  },
+  {
+    name: 'Nifty Smallcap 250',
+    symbol: 'NIFTYSML250',
+    current: 16850.25,
+    change: 195.40,
+    changePercent: 1.17,
+    high52w: 18420.80,
+    low52w: 13850.60,
+    intradayData: [
+      { time: '09:15', value: 16655 },
+      { time: '10:00', value: 16720 },
+      { time: '11:00', value: 16795 },
+      { time: '12:00', value: 16840 },
+      { time: '13:00', value: 16810 },
+      { time: '14:00', value: 16870 },
+      { time: '15:00', value: 16865 },
+      { time: '15:30', value: 16850 },
+    ],
+  },
+  {
+    name: 'India VIX',
+    symbol: 'INDIAVIX',
+    current: 13.42,
+    change: -0.85,
+    changePercent: -5.96,
+    high52w: 28.75,
+    low52w: 10.25,
+    intradayData: [
+      { time: '09:15', value: 14.27 },
+      { time: '10:00', value: 14.05 },
+      { time: '11:00', value: 13.88 },
+      { time: '12:00', value: 13.65 },
+      { time: '13:00', value: 13.72 },
+      { time: '14:00', value: 13.50 },
+      { time: '15:00', value: 13.45 },
+      { time: '15:30', value: 13.42 },
+    ],
+  },
+];
+
+// Market Breadth
+export const marketBreadth: MarketBreadth = {
+  advances: 1842,
+  declines: 1256,
+  unchanged: 142,
+  newHighs: 85,
+  newLows: 28,
+  above200DMA: 68.5,
+};
+
+// FII/DII Flows (last 30 days)
+const generateFlowData = (days: number): FIIDIIFlow[] => {
+  const data: FIIDIIFlow[] = [];
+  const today = new Date();
+
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+
+    // Skip weekends
+    if (date.getDay() === 0 || date.getDay() === 6) continue;
+
+    const fiiBuy = 8000 + Math.random() * 6000;
+    const fiiSell = 7000 + Math.random() * 7000;
+    const diiBuy = 6000 + Math.random() * 5000;
+    const diiSell = 5500 + Math.random() * 5500;
+
+    data.push({
+      date: date.toISOString().split('T')[0],
+      fiiBuy: Math.round(fiiBuy),
+      fiiSell: Math.round(fiiSell),
+      fiiNet: Math.round(fiiBuy - fiiSell),
+      diiBuy: Math.round(diiBuy),
+      diiSell: Math.round(diiSell),
+      diiNet: Math.round(diiBuy - diiSell),
+    });
+  }
+
+  return data;
+};
+
+export const fiiDiiFlows = generateFlowData(30);
+
+// Monthly and FY summaries
+export const fiiDiiSummary = {
+  monthlyFII: 4250,
+  monthlyDII: 2850,
+  fyFII: 28500,
+  fyDII: 42300,
+};
+
+// Sector Rotation Data
+export const sectorRotation: SectorRotation[] = [
+  { sectorId: 'it-services', sectorName: 'IT Services', relativePerformance: 3.2, momentumChange: 2.5 },
+  { sectorId: 'pharmaceuticals', sectorName: 'Pharma', relativePerformance: 2.8, momentumChange: 1.8 },
+  { sectorId: 'banking', sectorName: 'Banking', relativePerformance: 1.5, momentumChange: -0.8 },
+  { sectorId: 'auto', sectorName: 'Auto', relativePerformance: 4.2, momentumChange: 3.5 },
+  { sectorId: 'chemicals', sectorName: 'Chemicals', relativePerformance: 3.8, momentumChange: 2.2 },
+  { sectorId: 'capital-goods', sectorName: 'Capital Goods', relativePerformance: 5.2, momentumChange: 4.8 },
+  { sectorId: 'fmcg', sectorName: 'FMCG', relativePerformance: -0.5, momentumChange: 0.8 },
+  { sectorId: 'metals', sectorName: 'Metals', relativePerformance: -2.8, momentumChange: -1.5 },
+  { sectorId: 'realty', sectorName: 'Realty', relativePerformance: 4.8, momentumChange: 1.2 },
+  { sectorId: 'infrastructure', sectorName: 'Infra', relativePerformance: 6.2, momentumChange: 5.5 },
+  { sectorId: 'consumer-durables', sectorName: 'Consumer Durables', relativePerformance: 5.8, momentumChange: 3.2 },
+  { sectorId: 'telecom', sectorName: 'Telecom', relativePerformance: 0.8, momentumChange: -1.2 },
+  { sectorId: 'energy', sectorName: 'Energy', relativePerformance: -1.2, momentumChange: 0.5 },
+  { sectorId: 'media', sectorName: 'Media', relativePerformance: -0.8, momentumChange: -2.5 },
+];
+
+// Most Active Stocks - Volume Leaders
+export const volumeLeaders: ActiveStock[] = [
+  { symbol: 'RELIANCE', companyName: 'Reliance Industries', cmp: 2845.60, change: 24.50, changePercent: 0.87, volume: 12850000, value: 365.2 },
+  { symbol: 'TATAMOTORS', companyName: 'Tata Motors', cmp: 1025.30, change: -18.40, changePercent: -1.76, volume: 9650000, value: 98.9 },
+  { symbol: 'ICICIBANK', companyName: 'ICICI Bank', cmp: 1185.50, change: 12.80, changePercent: 1.09, volume: 8420000, value: 99.8 },
+  { symbol: 'HDFCBANK', companyName: 'HDFC Bank', cmp: 1642.30, change: 8.60, changePercent: 0.53, volume: 7850000, value: 128.9 },
+  { symbol: 'INFY', companyName: 'Infosys', cmp: 1820.40, change: 15.20, changePercent: 0.84, volume: 6950000, value: 126.5 },
+  { symbol: 'TCS', companyName: 'Tata Consultancy Services', cmp: 4125.80, change: 32.50, changePercent: 0.79, volume: 5240000, value: 216.2 },
+  { symbol: 'BHARTIARTL', companyName: 'Bharti Airtel', cmp: 1540.20, change: -8.40, changePercent: -0.54, volume: 4850000, value: 74.7 },
+  { symbol: 'SBIN', companyName: 'State Bank of India', cmp: 825.60, change: 6.80, changePercent: 0.83, volume: 4620000, value: 38.1 },
+  { symbol: 'AXISBANK', companyName: 'Axis Bank', cmp: 1145.30, change: -5.20, changePercent: -0.45, volume: 4280000, value: 49.0 },
+  { symbol: 'ITC', companyName: 'ITC Ltd', cmp: 485.70, change: 2.40, changePercent: 0.50, volume: 3950000, value: 19.2 },
+  { symbol: 'KOTAKBANK', companyName: 'Kotak Mahindra Bank', cmp: 1820.50, change: 12.30, changePercent: 0.68, volume: 3650000, value: 66.5 },
+  { symbol: 'LT', companyName: 'Larsen & Toubro', cmp: 3685.20, change: 28.60, changePercent: 0.78, volume: 3420000, value: 126.0 },
+  { symbol: 'WIPRO', companyName: 'Wipro Ltd', cmp: 485.30, change: 4.20, changePercent: 0.87, volume: 3280000, value: 15.9 },
+  { symbol: 'HINDUNILVR', companyName: 'Hindustan Unilever', cmp: 2640.80, change: -12.50, changePercent: -0.47, volume: 3150000, value: 83.2 },
+  { symbol: 'MARUTI', companyName: 'Maruti Suzuki', cmp: 12840.50, change: 85.20, changePercent: 0.67, volume: 2950000, value: 378.9 },
+  { symbol: 'SUNPHARMA', companyName: 'Sun Pharmaceutical', cmp: 1640.80, change: 14.60, changePercent: 0.90, volume: 2820000, value: 46.3 },
+  { symbol: 'NTPC', companyName: 'NTPC Ltd', cmp: 385.60, change: 3.20, changePercent: 0.84, volume: 2680000, value: 10.3 },
+  { symbol: 'ONGC', companyName: 'Oil & Natural Gas Corp', cmp: 285.30, change: -2.80, changePercent: -0.97, volume: 2540000, value: 7.2 },
+  { symbol: 'POWERGRID', companyName: 'Power Grid Corp', cmp: 325.80, change: 2.60, changePercent: 0.80, volume: 2420000, value: 7.9 },
+  { symbol: 'ADANIPORTS', companyName: 'Adani Ports', cmp: 1285.40, change: -8.60, changePercent: -0.66, volume: 2310000, value: 29.7 },
+];
+
+// Price Gainers
+export const priceGainers: ActiveStock[] = [
+  { symbol: 'KAYNES', companyName: 'Kaynes Technology', cmp: 4580.20, change: 418.20, changePercent: 10.04, volume: 125000, value: 5.7 },
+  { symbol: 'TITAN', companyName: 'Titan Company Limited', cmp: 7420.80, change: 602.40, changePercent: 8.84, volume: 98000, value: 7.3 },
+  { symbol: 'TCS', companyName: 'Tata Consultancy Services Limited', cmp: 5685.30, change: 440.00, changePercent: 8.39, volume: 156000, value: 8.9 },
+  { symbol: 'INFY', companyName: 'Infosys Limited', cmp: 6842.50, change: 522.10, changePercent: 8.26, volume: 84000, value: 5.7 },
+  { symbol: 'APOLLOHOSP', companyName: 'Apollo Hospitals', cmp: 6280.40, change: 456.80, changePercent: 7.84, volume: 112000, value: 7.0 },
+  { symbol: 'HDFCBANK', companyName: 'HDFC Bank Limited', cmp: 1820.60, change: 131.50, changePercent: 7.78, volume: 165000, value: 3.0 },
+  { symbol: 'TATAELXSI', companyName: 'Tata Elxsi', cmp: 7640.80, change: 520.30, changePercent: 7.31, volume: 45000, value: 3.4 },
+  { symbol: 'LTIM', companyName: 'LTIMindtree Limited', cmp: 5285.60, change: 346.40, changePercent: 7.01, volume: 92000, value: 4.9 },
+  { symbol: 'WIPRO', companyName: 'Wipro Limited', cmp: 1128.40, change: 72.80, changePercent: 6.90, volume: 185000, value: 2.1 },
+  { symbol: 'TECHM', companyName: 'Tech Mahindra Limited', cmp: 2540.80, change: 158.60, changePercent: 6.66, volume: 124000, value: 3.2 },
+  { symbol: 'LALPATHLAB', companyName: 'Dr Lal PathLabs', cmp: 3140.20, change: 194.50, changePercent: 6.60, volume: 68000, value: 2.1 },
+  { symbol: 'KPITTECH', companyName: 'KPIT Technologies', cmp: 1685.40, change: 102.80, changePercent: 6.50, volume: 215000, value: 3.6 },
+  { symbol: 'POLYCA B', companyName: 'Polycab India', cmp: 5840.60, change: 352.40, changePercent: 6.42, volume: 56000, value: 3.3 },
+  { symbol: 'DMART', companyName: 'Avenue Supermarts', cmp: 4285.80, change: 254.20, changePercent: 6.31, volume: 85000, value: 3.6 },
+  { symbol: 'PIIND', companyName: 'PI Industries', cmp: 3940.50, change: 228.40, changePercent: 6.15, volume: 74000, value: 2.9 },
+  { symbol: 'INDIGO', companyName: 'InterGlobe Aviation', cmp: 4520.30, change: 260.80, changePercent: 6.12, volume: 92000, value: 4.2 },
+  { symbol: 'VOLTAS', companyName: 'Voltas Ltd', cmp: 1640.80, change: 94.20, changePercent: 6.09, volume: 145000, value: 2.4 },
+  { symbol: 'ABCAPITAL', companyName: 'Aditya Birla Capital', cmp: 218.60, change: 12.50, changePercent: 6.07, volume: 3250000, value: 7.1 },
+  { symbol: 'HAVELLS', companyName: 'Havells India', cmp: 1685.40, change: 95.80, changePercent: 6.03, volume: 168000, value: 2.8 },
+  { symbol: 'ZOMATO', companyName: 'Zomato Ltd', cmp: 245.80, change: 13.90, changePercent: 5.99, volume: 4850000, value: 11.9 },
+];
+
+// Price Losers
+export const priceLosers: ActiveStock[] = [
+  { symbol: 'PAYTM', companyName: 'One97 Communications', cmp: 385.60, change: -42.80, changePercent: -9.99, volume: 2850000, value: 11.0 },
+  { symbol: 'TATAMOTORS', companyName: 'Tata Motors', cmp: 985.30, change: -102.50, changePercent: -9.42, volume: 4250000, value: 41.9 },
+  { symbol: 'ZEEL', companyName: 'Zee Entertainment', cmp: 145.80, change: -14.20, changePercent: -8.88, volume: 6850000, value: 10.0 },
+  { symbol: 'IDFC', companyName: 'IDFC Ltd', cmp: 118.40, change: -11.20, changePercent: -8.64, volume: 8420000, value: 10.0 },
+  { symbol: 'YESBANK', companyName: 'Yes Bank', cmp: 24.60, change: -2.30, changePercent: -8.55, volume: 125000000, value: 30.8 },
+  { symbol: 'VODAFONEIDEA', companyName: 'Vodafone Idea', cmp: 13.85, change: -1.28, changePercent: -8.46, volume: 285000000, value: 39.5 },
+  { symbol: 'APOLLOHOSP', companyName: 'Apollo Hospitals Enterprise Limited', cmp: 268.40, change: -24.60, changePercent: -8.40, volume: 2650000, value: 7.1 },
+  { symbol: 'HINDALCO', companyName: 'Hindalco Industries', cmp: 625.80, change: -56.20, changePercent: -8.24, volume: 3450000, value: 21.6 },
+  { symbol: 'TATASTEEL', companyName: 'Tata Steel', cmp: 142.60, change: -12.70, changePercent: -8.18, volume: 8650000, value: 12.3 },
+  { symbol: 'JSWSTEEL', companyName: 'JSW Steel', cmp: 885.40, change: -77.80, changePercent: -8.08, volume: 2840000, value: 25.1 },
+  { symbol: 'COALINDIA', companyName: 'Coal India', cmp: 425.60, change: -36.80, changePercent: -7.96, volume: 4250000, value: 18.1 },
+  { symbol: 'SAIL', companyName: 'Steel Authority of India', cmp: 118.50, change: -10.20, changePercent: -7.93, volume: 12500000, value: 14.8 },
+  { symbol: 'NMDC', companyName: 'NMDC Ltd', cmp: 185.40, change: -15.80, changePercent: -7.85, volume: 6840000, value: 12.7 },
+  { symbol: 'VEDL', companyName: 'Vedanta Ltd', cmp: 385.60, change: -32.40, changePercent: -7.75, volume: 4250000, value: 16.4 },
+  { symbol: 'PNB', companyName: 'Punjab National Bank', cmp: 102.80, change: -8.60, changePercent: -7.72, volume: 18500000, value: 19.0 },
+  { symbol: 'CANBK', companyName: 'Canara Bank', cmp: 108.60, change: -9.00, changePercent: -7.65, volume: 12400000, value: 13.5 },
+  { symbol: 'BANKBARODA', companyName: 'Bank of Baroda', cmp: 245.80, change: -20.20, changePercent: -7.60, volume: 8650000, value: 21.3 },
+  { symbol: 'IOC', companyName: 'Indian Oil Corp', cmp: 142.60, change: -11.60, changePercent: -7.53, volume: 14200000, value: 20.2 },
+  { symbol: 'BPCL', companyName: 'Bharat Petroleum', cmp: 325.80, change: -26.40, changePercent: -7.50, volume: 5840000, value: 19.0 },
+  { symbol: 'RECLTD', companyName: 'REC Ltd', cmp: 485.60, change: -39.20, changePercent: -7.47, volume: 3650000, value: 17.7 },
+];
+
+// 52-Week Highs
+export const week52Highs: ActiveStock[] = [
+  { symbol: 'INDIGO', companyName: 'InterGlobe Aviation', cmp: 4520.30, change: 260.80, changePercent: 6.12, volume: 92000, value: 4.2, high52w: 4520.30 },
+  { symbol: 'TITAN', companyName: 'Titan Company Limited', cmp: 7420.80, change: 602.40, changePercent: 8.84, volume: 98000, value: 7.3, high52w: 7420.80 },
+  { symbol: 'KAYNES', companyName: 'Kaynes Technology', cmp: 4580.20, change: 418.20, changePercent: 10.04, volume: 125000, value: 5.7, high52w: 4580.20 },
+  { symbol: 'TATAELXSI', companyName: 'Tata Elxsi', cmp: 7640.80, change: 520.30, changePercent: 7.31, volume: 45000, value: 3.4, high52w: 7640.80 },
+  { symbol: 'APOLLOHOSP', companyName: 'Apollo Hospitals', cmp: 6280.40, change: 456.80, changePercent: 7.84, volume: 112000, value: 7.0, high52w: 6280.40 },
+  { symbol: 'RELIANCE', companyName: 'Reliance Industries Limited', cmp: 5840.60, change: 352.40, changePercent: 6.42, volume: 56000, value: 3.3, high52w: 5840.60 },
+  { symbol: 'TCS', companyName: 'Tata Consultancy Services Limited', cmp: 5685.30, change: 440.00, changePercent: 8.39, volume: 156000, value: 8.9, high52w: 5685.30 },
+  { symbol: 'INFY', companyName: 'Infosys Limited', cmp: 6842.50, change: 522.10, changePercent: 8.26, volume: 84000, value: 5.7, high52w: 6842.50 },
+  { symbol: 'LTIM', companyName: 'LTIMindtree Limited', cmp: 5285.60, change: 346.40, changePercent: 7.01, volume: 92000, value: 4.9, high52w: 5285.60 },
+  { symbol: 'PIIND', companyName: 'PI Industries', cmp: 3940.50, change: 228.40, changePercent: 6.15, volume: 74000, value: 2.9, high52w: 3940.50 },
+  { symbol: 'DMART', companyName: 'Avenue Supermarts', cmp: 4285.80, change: 254.20, changePercent: 6.31, volume: 85000, value: 3.6, high52w: 4285.80 },
+  { symbol: 'LALPATHLAB', companyName: 'Dr Lal PathLabs', cmp: 3140.20, change: 194.50, changePercent: 6.60, volume: 68000, value: 2.1, high52w: 3140.20 },
+  { symbol: 'TECHM', companyName: 'Tech Mahindra Limited', cmp: 2540.80, change: 158.60, changePercent: 6.66, volume: 124000, value: 3.2, high52w: 2540.80 },
+  { symbol: 'KPITTECH', companyName: 'KPIT Technologies', cmp: 1685.40, change: 102.80, changePercent: 6.50, volume: 215000, value: 3.6, high52w: 1685.40 },
+  { symbol: 'HAVELLS', companyName: 'Havells India', cmp: 1685.40, change: 95.80, changePercent: 6.03, volume: 168000, value: 2.8, high52w: 1685.40 },
+  { symbol: 'HDFCBANK', companyName: 'HDFC Bank Limited', cmp: 1820.60, change: 131.50, changePercent: 7.78, volume: 165000, value: 3.0, high52w: 1820.60 },
+  { symbol: 'WIPRO', companyName: 'Wipro Limited', cmp: 1128.40, change: 72.80, changePercent: 6.90, volume: 185000, value: 2.1, high52w: 1128.40 },
+  { symbol: 'VOLTAS', companyName: 'Voltas Ltd', cmp: 1640.80, change: 94.20, changePercent: 6.09, volume: 145000, value: 2.4, high52w: 1640.80 },
+  { symbol: 'ZOMATO', companyName: 'Zomato Ltd', cmp: 245.80, change: 13.90, changePercent: 5.99, volume: 4850000, value: 11.9, high52w: 245.80 },
+  { symbol: 'ABCAPITAL', companyName: 'Aditya Birla Capital', cmp: 218.60, change: 12.50, changePercent: 6.07, volume: 3250000, value: 7.1, high52w: 218.60 },
+];
+
+// 52-Week Lows
+export const week52Lows: ActiveStock[] = [
+  { symbol: 'VODAFONEIDEA', companyName: 'Vodafone Idea', cmp: 13.85, change: -1.28, changePercent: -8.46, volume: 285000000, value: 39.5, low52w: 13.85 },
+  { symbol: 'YESBANK', companyName: 'Yes Bank', cmp: 24.60, change: -2.30, changePercent: -8.55, volume: 125000000, value: 30.8, low52w: 24.60 },
+  { symbol: 'PNB', companyName: 'Punjab National Bank', cmp: 102.80, change: -8.60, changePercent: -7.72, volume: 18500000, value: 19.0, low52w: 102.80 },
+  { symbol: 'CANBK', companyName: 'Canara Bank', cmp: 108.60, change: -9.00, changePercent: -7.65, volume: 12400000, value: 13.5, low52w: 108.60 },
+  { symbol: 'IDFC', companyName: 'IDFC Ltd', cmp: 118.40, change: -11.20, changePercent: -8.64, volume: 8420000, value: 10.0, low52w: 118.40 },
+  { symbol: 'SAIL', companyName: 'Steel Authority of India', cmp: 118.50, change: -10.20, changePercent: -7.93, volume: 12500000, value: 14.8, low52w: 118.50 },
+  { symbol: 'IOC', companyName: 'Indian Oil Corp', cmp: 142.60, change: -11.60, changePercent: -7.53, volume: 14200000, value: 20.2, low52w: 142.60 },
+  { symbol: 'TATASTEEL', companyName: 'Tata Steel', cmp: 142.60, change: -12.70, changePercent: -8.18, volume: 8650000, value: 12.3, low52w: 142.60 },
+  { symbol: 'ZEEL', companyName: 'Zee Entertainment', cmp: 145.80, change: -14.20, changePercent: -8.88, volume: 6850000, value: 10.0, low52w: 145.80 },
+  { symbol: 'NMDC', companyName: 'NMDC Ltd', cmp: 185.40, change: -15.80, changePercent: -7.85, volume: 6840000, value: 12.7, low52w: 185.40 },
+  { symbol: 'BANKBARODA', companyName: 'Bank of Baroda', cmp: 245.80, change: -20.20, changePercent: -7.60, volume: 8650000, value: 21.3, low52w: 245.80 },
+  { symbol: 'APOLLOHOSP', companyName: 'Apollo Hospitals Enterprise Limited', cmp: 268.40, change: -24.60, changePercent: -8.40, volume: 2650000, value: 7.1, low52w: 268.40 },
+  { symbol: 'BPCL', companyName: 'Bharat Petroleum', cmp: 325.80, change: -26.40, changePercent: -7.50, volume: 5840000, value: 19.0, low52w: 325.80 },
+  { symbol: 'VEDL', companyName: 'Vedanta Ltd', cmp: 385.60, change: -32.40, changePercent: -7.75, volume: 4250000, value: 16.4, low52w: 385.60 },
+  { symbol: 'PAYTM', companyName: 'One97 Communications', cmp: 385.60, change: -42.80, changePercent: -9.99, volume: 2850000, value: 11.0, low52w: 385.60 },
+  { symbol: 'COALINDIA', companyName: 'Coal India', cmp: 425.60, change: -36.80, changePercent: -7.96, volume: 4250000, value: 18.1, low52w: 425.60 },
+  { symbol: 'RECLTD', companyName: 'REC Ltd', cmp: 485.60, change: -39.20, changePercent: -7.47, volume: 3650000, value: 17.7, low52w: 485.60 },
+  { symbol: 'HINDALCO', companyName: 'Hindalco Industries', cmp: 625.80, change: -56.20, changePercent: -8.24, volume: 3450000, value: 21.6, low52w: 625.80 },
+  { symbol: 'JSWSTEEL', companyName: 'JSW Steel', cmp: 885.40, change: -77.80, changePercent: -8.08, volume: 2840000, value: 25.1, low52w: 885.40 },
+  { symbol: 'TATAMOTORS', companyName: 'Tata Motors', cmp: 985.30, change: -102.50, changePercent: -9.42, volume: 4250000, value: 41.9, low52w: 985.30 },
+];
